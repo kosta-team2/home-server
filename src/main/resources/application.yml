@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: home
+
+  profiles:
+    active: local
+
+logging:
+  level:
+    root: info
