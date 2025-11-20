@@ -1,5 +1,6 @@
 package com.home.global.exception;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 
 import org.springframework.http.ProblemDetail;
@@ -31,6 +32,7 @@ public class GlobalExceptionHandler {
 
 	private ProblemDetail createProblemDetail(Exception ex, ErrorCode errorCode) {
 		ProblemDetail problemDetail = ProblemDetail.forStatus(errorCode.getHttpStatus());
+		problemDetail.setType(URI.create("/docs/errors.html#" + errorCode.getTitle()));
 		problemDetail.setTitle(errorCode.getTitle());
 		problemDetail.setDetail(errorCode.getDetail());
 		problemDetail.setProperty("exception", ex.getClass().getSimpleName());
