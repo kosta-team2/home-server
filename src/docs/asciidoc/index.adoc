@@ -1,0 +1,77 @@
+= Kosta-Team2 final project API docs
+:doctype: book
+:icons: font
+:source-highlighter: coderay
+:toc: left
+:toc-title: 목차
+:toclevels: 3
+:sectlinks:
+:sectnums:
+
+== 개요
+'Kosta-Team2 Final Project' 의 백엔드 API 문서입니다.
+
+이 문서는 실거래가 데이터, 아파트 단지 정보, 회원/인증 등
+Kosta-Team2에서 제공하는 모든 REST API의 명세를 제공합니다.
+
+
+=== API 서버 경로
+[cols="2,5,3"]
+|====
+|환경         |DNS |비고
+|개발(dev)    | link:[] |API 문서 제공
+|베타(beta)   | link:[] |API 문서 제공
+|운영(prod)   | link:[] |API 문서 미제공
+|====
+
+[NOTE]
+====
+해당 프로젝트 API문서는 개발환경까지 노출되는 것을 권장합니다.
+====
+
+[CAUTION]
+====
+운영환경에 노출될 경우 보안 관련 문제가 발생할 수 있습니다.
+====
+
+=== 응답형식
+본 프로젝트는 성공 응답에 대해 별도의 공통 래퍼(JSON)를 사용하지 않습니다. +
+HTTP 상태 코드 + 실제 리소스 JSON 을 그대로 반환합니다.
+
+|====
+|상황 | HTTP 상태 코드 | 응답 Body 예시
+
+| 조회 성공 (데이터 있음)
+| `200 OK`
+a|[source,json]
+----
+{
+  "id": 1,
+  "name": "kosta-apartment",
+  "address": "서울시 ..."
+}
+----
+
+| 생성 성공
+| `201 Created`
+a|[source,json]
+----
+{
+  "id": 10,
+  "name": "new-resource"
+}
+----
+
+| 삭제 성공 (응답 본문 없음)
+| `204 No Content`
+a|[source,json]
+|====
+
+[[error-code-list]]
+=== 에러 코드 목록
+
+에러 응답의 `title`(에러 코드) 값은 아래 규칙을 따릅니다.
+
+include::{snippets}/error-codes-sections.adoc[]
+
+

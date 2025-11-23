@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
 
 	private ProblemDetail createProblemDetail(Exception ex, ErrorCode errorCode) {
 		ProblemDetail problemDetail = ProblemDetail.forStatus(errorCode.getHttpStatus());
-		problemDetail.setType(URI.create("/docs/errors.html#" + errorCode.getTitle()));
+		problemDetail.setType(URI.create("/docs/index.html#error-code-list"));
 		problemDetail.setTitle(errorCode.getTitle());
 		problemDetail.setDetail(errorCode.getDetail());
 		problemDetail.setProperty("exception", ex.getClass().getSimpleName());

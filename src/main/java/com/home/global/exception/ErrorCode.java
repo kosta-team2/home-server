@@ -9,10 +9,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-	// ==== 공통(Common) ====
-	INVALID_INPUT(HttpStatus.BAD_REQUEST, "COMMON-400", "잘못된 요청 형식 입니다."),
-	INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "COMMON-401", "잘못된 파라미터 형식 입니다."),
-	INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON-500", "서버 오류가 발생했습니다.");
+	INVALID_INPUT(HttpStatus.BAD_REQUEST, "C400", "잘못된 요청 형식 입니다."),
+	INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "C401", "잘못된 파라미터 형식 입니다."),
+	INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C500", "서버 오류가 발생했습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String title;

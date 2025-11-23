@@ -1,8 +1,0 @@
-= Error Codes
-:toc: left
-
-이 문서는 Home API의 에러 응답 규격과 에러 코드 목록입니다.
-
-== 에러 코드 목록
-
-include::{snippets}/error-codes-sections.adoc[]
