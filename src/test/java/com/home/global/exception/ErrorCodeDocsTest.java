@@ -1,4 +1,4 @@
-package com.home.docs;
+package com.home.global.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,8 +10,6 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-
-import com.home.global.exception.ErrorCode;
 
 class ErrorCodeDocsTest {
 
