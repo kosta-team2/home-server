@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7'
+    id "org.asciidoctor.jvm.convert" version "3.3.2"
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.ec4j.editorconfig' version '0.1.0'
     id 'checkstyle'
@@ -21,6 +22,7 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    asciidoctorExt
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -59,14 +61,35 @@ dependencies {
     testImplementation 'org.testcontainers:postgresql'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor:3.0.2'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc:3.0.2'
+}
+
+ext {
+    snippetsDir = file('build/generated-snippets')
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    outputs.dir snippetsDir
     //mokito 경고 무시
     jvmArgs("-XX:+EnableDynamicAgentLoading",
             "-Xshare:off"
     )
+}
+
+tasks.named('asciidoctor') {
+    inputs.dir snippetsDir
+    configurations 'asciidoctorExt'
+    dependsOn test
+}
+
+bootJar {
+    dependsOn asciidoctor
+    from("${asciidoctor.outputDir}") {
+        into 'BOOT-INF/classes/static/docs'
+    }
 }
 
 // 한 방 검증 파이프라인(이름: verify)

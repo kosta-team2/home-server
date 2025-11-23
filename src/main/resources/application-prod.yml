@@ -20,3 +20,10 @@ spring:
         format_sql: true
         show_sql: true
     open-in-view: false
+
+server:
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
