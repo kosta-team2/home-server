@@ -37,6 +37,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/home
       SPRING_DATASOURCE_USERNAME: home_user
       SPRING_DATASOURCE_PASSWORD: home1234
+      APT_SERVICE_KEY: ${APT_SERVICE_KEY}
+      BLD_SERVICE_KEY: ${BLD_SERVICE_KEY}
+      ODC_SERVICE_KEY: ${ODC_SERVICE_KEY}
+      VW_SERVICE_KEY: ${VW_SERVICE_KEY}
     depends_on:
       postgres:
         condition: service_healthy

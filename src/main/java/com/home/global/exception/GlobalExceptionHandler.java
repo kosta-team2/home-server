@@ -7,6 +7,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestClientException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,6 +24,14 @@ public class GlobalExceptionHandler {
 	}
 
 	/**
+	 * [Exception] 외부 API(RestClient) 호출 실패
+	 * */
+	@ExceptionHandler(RestClientException.class)
+	public ProblemDetail handleRestClientException(RestClientException ex) {
+		return createProblemDetail(ex, ErrorCode.EXTERNAL_API_ERROR);
+	}
+
+	/**
 	 * [Exception] 예측하지 못한 모든 예외 처리
 	 * */
 	@ExceptionHandler(Exception.class)
@@ -32,7 +41,7 @@ public class GlobalExceptionHandler {
 
 	private ProblemDetail createProblemDetail(Exception ex, ErrorCode errorCode) {
 		ProblemDetail problemDetail = ProblemDetail.forStatus(errorCode.getHttpStatus());
-		problemDetail.setType(URI.create("/docs/errors.html#" + errorCode.getTitle()));
+		problemDetail.setType(URI.create("/docs/index.html#error-code-list"));
 		problemDetail.setTitle(errorCode.getTitle());
 		problemDetail.setDetail(errorCode.getDetail());
 		problemDetail.setProperty("exception", ex.getClass().getSimpleName());

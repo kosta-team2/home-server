@@ -1,4 +1,4 @@
-package com.home.docs;
+package com.home.global.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,8 +11,6 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-import com.home.global.exception.ErrorCode;
-
 class ErrorCodeDocsTest {
 
 	private static final Path SNIPPETS_DIR = Path.of("build/generated-snippets");
@@ -24,31 +22,44 @@ class ErrorCodeDocsTest {
 		Path file = SNIPPETS_DIR.resolve("error-codes-sections.adoc");
 
 		try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
+			writeTableHeader(writer);
+
 			for (ErrorCode errorCode : ErrorCode.values()) {
-				writeSection(writer, errorCode);
+				writeTableRow(writer, errorCode);
 			}
+
+			writeTableFooter(writer);
 		}
 
 		assertThat(Files.exists(file)).isTrue();
 	}
 
-	private void writeSection(BufferedWriter writer, ErrorCode errorCode) throws IOException {
-		String anchor = errorCode.getTitle();
+	private void writeTableHeader(BufferedWriter writer) throws IOException {
+		writer.write("[cols=\"2,3,5\"]");
+		writer.newLine();
+		writer.write("|====");
+		writer.newLine();
+		writer.write("|코드 |HTTP 상태 |설명");
+		writer.newLine();
+	}
+
+	private void writeTableRow(BufferedWriter writer, ErrorCode errorCode) throws IOException {
+		String code = errorCode.getTitle();
 		HttpStatus status = errorCode.getHttpStatus();
 		String detail = errorCode.getDetail();
 
-		writer.write("[[" + anchor + "]]");
-		writer.newLine();
-		writer.write("=== " + anchor);
-		writer.newLine();
+		writer.write("|[[" + code + "]]" + code);
 		writer.newLine();
 
-		writer.write("*HTTP 상태*:: `" + status.value() + " " + status.getReasonPhrase() + "`");
-		writer.newLine();
+		writer.write("|`" + status.getReasonPhrase() + "(" + status.value() + ")" + "`");
 		writer.newLine();
 
-		writer.write("*detail(기본 메시지)*:: `" + detail + "`");
+		writer.write("|" + detail);
 		writer.newLine();
+	}
+
+	private void writeTableFooter(BufferedWriter writer) throws IOException {
+		writer.write("|====");
 		writer.newLine();
 	}
 }
