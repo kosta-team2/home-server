@@ -76,25 +76,25 @@ class VworldClientTest {
 	}
 
 	private static final String VWORLD_JSON = """
-	{
-		"type": "FeatureCollection",
-		"features": [
-			{
-				"type": "Feature",
-				"properties": {
-					"buld_prpos_code": "02000",
-					"buld_nm": "백송마을",
-					"dong_nm": "309동",
-					"pnu": "4128510600111830000"
-				},
-				"bbox": [
-					126.78883503,
-					37.64976489,
-					126.78943972,
-					37.65006229
-				]
-			}
-		]
-	}
-	""";
+		{
+			"type": "FeatureCollection",
+			"features": [
+				{
+					"type": "Feature",
+					"properties": {
+						"buld_prpos_code": "02000",
+						"buld_nm": "백송마을",
+						"dong_nm": "309동",
+						"pnu": "4128510600111830000"
+					},
+					"bbox": [
+						126.78883503,
+						37.64976489,
+						126.78943972,
+						37.65006229
+					]
+				}
+			]
+		}
+		""";
 }
