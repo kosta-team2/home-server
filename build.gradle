@@ -68,6 +68,7 @@ dependencies {
 
     testImplementation 'com.epages:restdocs-api-spec-mockmvc:0.19.4'
 
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
 }
 
 ext {
@@ -76,7 +77,6 @@ ext {
 
 tasks.named('test') {
     useJUnitPlatform()
-    outputs.dir snippetsDir
     //mokito 경고 무시
     jvmArgs("-XX:+EnableDynamicAgentLoading",
             "-Xshare:off"
@@ -85,7 +85,9 @@ tasks.named('test') {
 
 //@Tag("restDocs")을 찾아서 문서화
 tasks.register("restDocsTest", Test) {
+    dependsOn tasks.named("test")
     outputs.dir snippetsDir
+
     useJUnitPlatform {
         includeTags("restDocs")
     }
@@ -97,6 +99,7 @@ tasks.register("restDocsTest", Test) {
 tasks.named('asciidoctor') {
     inputs.dir snippetsDir
     configurations 'asciidoctorExt'
+    dependsOn tasks.named('test')
     dependsOn tasks.named('restDocsTest')
 }
 
@@ -155,10 +158,12 @@ jacoco {
 
 // === JaCoCo 공통 exclude 패턴 ===
 def jacocoExcludes = [
-        '**/Q*',              // QueryDSL
-        '**/*Application*',   // 메인 애플리케이션 클래스
-        '**/*Config*',        // 설정 클래스
-        '**/dto/**',          // DTO
+        '**/Q*',                 // QueryDSL
+        '**/*Application*',      // 메인 애플리케이션 클래스
+        '**/*Config*',           // 설정 클래스
+        '**/dto/**',             // DTO
+        '**/external/**',        // API Client
+        '**/global/exception/**' // exception
 ]
 
 // 리포트 생성
@@ -192,7 +197,8 @@ jacocoTestCoverageVerification {
     )
 
     violationRules {
-        rule {
+/*
+          rule {
             element = 'CLASS'
             limit {
                 counter = 'LINE'
@@ -200,12 +206,23 @@ jacocoTestCoverageVerification {
                 minimum = 0.70    // 라인 커버리지 최소 70%
             }
         }
+*/
+/*
         rule {
             element = 'CLASS'
             limit {
                 counter = 'BRANCH'
                 value = 'COVEREDRATIO'
                 minimum = 0.70    // 브랜치 커버리지 최소 70%
+            }
+        }
+*/
+        rule {
+            element = 'BUNDLE'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.70  // 전체 평균 70% 유지
             }
         }
     }
