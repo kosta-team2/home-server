@@ -1,0 +1,30 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+logging:
+  level:
+    root: warn
+
+apis:
+  data:
+    base-url: http://localhost
+    apt-service-key: DUMMY
+    apt-title-path: /dummy
+    bld-service-key: DUMMY
+    bld-title-path: /dummy
+
+odcloud:
+  data:
+    base-url: http://localhost
+    od-service-key: DUMMY
+    apt-title-path: /dummy
+    dong-title-path: /dummy
+
+vworld:
+  data:
+    base-url: http://localhost
+    vw-service-key: DUMMY
+    vw-title-path: /dummy
+    vm-domain: http://localhost
