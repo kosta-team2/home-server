@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.home.global.exception.ErrorCode;
+import com.home.global.exception.external.ExternalApiException;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -50,4 +52,24 @@ public class VworldAreaResponse {
 		 */
 		private List<Double> bbox;
 	}
+
+	public VworldAreaCoordinateResponse toCoordinate() {
+		if (response.status.trim().equals("NOT_FOUND")) {
+			throw new ExternalApiException(ErrorCode.EXTERNAL_API_ERROR, "VWorld 행정구역에 대한 정보를 찾기 못했습니다.");
+		}
+
+		FeatureCollection fc = response.getResult().getFeatureCollection();
+		List<Double> bbox = fc.getBbox();
+
+		double minX = bbox.get(0);
+		double minY = bbox.get(1);
+		double maxX = bbox.get(2);
+		double maxY = bbox.get(3);
+
+		double longitude = (minX + maxX) / 2.0;
+		double latitude = (minY + maxY) / 2.0;
+
+		return new VworldAreaCoordinateResponse(longitude, latitude);
+	}
+
 }

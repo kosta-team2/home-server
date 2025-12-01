@@ -3,11 +3,13 @@ package com.home.infrastructure.external.vworld;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import com.home.infrastructure.external.vworld.dto.VworldAreaResponse;
 import com.home.infrastructure.external.vworld.dto.VworldgisResponse;
 
+@Component
 public class VworldClient {
 
 	private final RestClient client;
