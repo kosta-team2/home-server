@@ -16,10 +16,33 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
 	/**
+	 * [Exception] 비즈니스/도메인 예외
+	 */
+	@ExceptionHandler(BusinessException.class)
+	public ProblemDetail handle(BusinessException ex) {
+		if (ex.isNecessaryToLog()) {
+			log.error("[BusinessException] {}", ex.getMessage(), ex);
+		}
+		ErrorCode errorCode = ex.getErrorCode();
+
+		ProblemDetail problemDetail = ProblemDetail.forStatus(errorCode.getHttpStatus());
+		problemDetail.setType(URI.create("/docs/index.html#error-code-list"));
+		problemDetail.setTitle(errorCode.getTitle());
+		problemDetail.setDetail(ex.getMessage());
+		problemDetail.setProperty("exception", ex.getClass().getSimpleName());
+		problemDetail.setProperty("timestamp", LocalDateTime.now());
+
+		log.warn("[BusinessException] code={}, message={}",
+			errorCode.getTitle(), ex.getMessage(), ex);
+
+		return problemDetail;
+	}
+
+	/**
 	 * [Exception] @Valid, @RequestBody 검증 실패
 	 * */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+	public ProblemDetail handle(MethodArgumentNotValidException ex) {
 		return createProblemDetail(ex, ErrorCode.INVALID_INPUT);
 	}
 
@@ -27,7 +50,7 @@ public class GlobalExceptionHandler {
 	 * [Exception] 외부 API(RestClient) 호출 실패
 	 * */
 	@ExceptionHandler(RestClientException.class)
-	public ProblemDetail handleRestClientException(RestClientException ex) {
+	public ProblemDetail handle(RestClientException ex) {
 		return createProblemDetail(ex, ErrorCode.EXTERNAL_API_ERROR);
 	}
 
@@ -35,7 +58,7 @@ public class GlobalExceptionHandler {
 	 * [Exception] 예측하지 못한 모든 예외 처리
 	 * */
 	@ExceptionHandler(Exception.class)
-	public ProblemDetail handleException(Exception ex) {
+	public ProblemDetail handle(Exception ex) {
 		return createProblemDetail(ex, ErrorCode.INTERNAL_ERROR);
 	}
 
