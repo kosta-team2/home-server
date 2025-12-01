@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.home.infrastructure.batch.region.dto.RegionCsvRowRequest;
 import com.home.infrastructure.batch.region.dto.RegionCsvRowResponse;
 
@@ -17,6 +19,7 @@ import com.home.infrastructure.batch.region.dto.RegionCsvRowResponse;
  * 법정동 코드 CSV를 읽어서 RegionCsvRow 리스트로 변환하는 리더
  * - 기본적으로 상태(status)가 "존재"인 행만 필터링한다.
  */
+@Component
 public class RegionCsvReader {
 	private static final String EXIST_STATUS = "존재";
 
@@ -40,9 +43,17 @@ public class RegionCsvReader {
 
 				RegionCsvRowRequest raw = parseLine(line);
 
-				if (EXIST_STATUS.equals(raw.status())) {
-					result.add(new RegionCsvRowResponse(raw.lawdCode(), raw.fullName()));
+				//상태가 존재가 아니면 무시
+				if (!EXIST_STATUS.equals(raw.status())) {
+					continue;
 				}
+
+				//리가 들어간 형태면 무시
+				if (isRi(raw.lawdCode())) {
+					continue;
+				}
+
+				result.add(new RegionCsvRowResponse(raw.lawdCode(), raw.fullName()));
 			}
 
 			return result;
@@ -63,6 +74,15 @@ public class RegionCsvReader {
 		String status = tokens[2].trim();
 
 		return new RegionCsvRowRequest(lawdCode, fullName, status);
+	}
+
+	private boolean isRi(String lawdCode) {
+		if (lawdCode == null || lawdCode.length() != 10) {
+			return false;
+		}
+
+		String lastTwo = lawdCode.substring(8, 10);
+		return !lastTwo.equals("00");
 	}
 
 }
