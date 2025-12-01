@@ -14,7 +14,7 @@ spring:
   jpa:
     defer-datasource-initialization: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
@@ -63,5 +63,9 @@ vworld:
 
     # 2D데이터 API 2.0 레퍼런스
     vm-data-path: /req/data
+
+home:
+  region:
+    csv-path: src/main/resources/data/lawd_20250805.csv
 
 
