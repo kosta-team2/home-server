@@ -26,5 +26,6 @@ vworld:
   data:
     base-url: http://localhost
     vw-service-key: DUMMY
-    vw-title-path: /dummy
-    vm-domain: http://localhost
+    vm-domain: /dummy
+    vm-wfs-path: /dummy
+    vm-data-path: /dummy
