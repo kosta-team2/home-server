@@ -18,20 +18,21 @@ class RegionCsvReaderTest {
 	@TempDir
 	Path tempDir;
 
+	private static final String CONTENT = """
+		법정동코드,법정동명,상태
+		1114015000,서울특별시 중구 을지로4가,존재
+		1114016000,서울특별시 중구 을지로5가,폐지
+		1114017000,서울특별시 중구 을지로6가,존재
+		4122025033,경기도 평택시 팽성읍 함정리,존재
+		""";
+
 	@Test
 	@DisplayName("CSV에서 상태가 '존재'인 행만 읽어온다")
 	void readExisting_success() throws IOException {
 		// given
 		Path csv = tempDir.resolve("lawd.csv");
 
-		String content = """
-			법정동코드,법정동명,상태
-			1114015000,서울특별시 중구 을지로4가,존재
-			1114016000,서울특별시 중구 을지로5가,폐지
-			1114017000,서울특별시 중구 을지로6가,존재
-			""";
-
-		Files.writeString(csv, content);
+		Files.writeString(csv, CONTENT);
 
 		RegionCsvReader reader = new RegionCsvReader();
 
