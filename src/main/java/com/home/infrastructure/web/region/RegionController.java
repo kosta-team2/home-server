@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.home.application.region.RegionUseCase;
-import com.home.infrastructure.web.region.dto.RegionResponse;
+import com.home.infrastructure.web.region.dto.RegionDetailResponse;
+import com.home.infrastructure.web.region.dto.RootRegionResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,15 +22,15 @@ public class RegionController {
 	private final RegionUseCase regionUseCase;
 
 	@GetMapping("/{id}")
-	public ResponseEntity<List<RegionResponse>> getRegionsById(@PathVariable Long id) {
-		List<RegionResponse> list = regionUseCase.getRegionByParentId(id);
+	public ResponseEntity<RegionDetailResponse> getRegionsById(@PathVariable Long id) {
+		RegionDetailResponse response = regionUseCase.getRegionInfoWithChildren(id);
 
-		return ResponseEntity.status(HttpStatus.OK).body(list);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@GetMapping
-	public ResponseEntity<List<RegionResponse>> getRegionsById() {
-		List<RegionResponse> list = regionUseCase.getRegionByParentId();
+	public ResponseEntity<List<RootRegionResponse>> getRegionsById() {
+		List<RootRegionResponse> list = regionUseCase.getRegionByParentId();
 
 		return ResponseEntity.status(HttpStatus.OK).body(list);
 	}
