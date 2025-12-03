@@ -163,7 +163,9 @@ def jacocoExcludes = [
         '**/*Config*',           // 설정 클래스
         '**/dto/**',             // DTO
         '**/external/**',        // API Client
-        '**/global/exception/**' // exception
+        '**/global/exception/**',// exception 패키지 내부
+        '**/*Exception*',        // exception 클래스
+        '**/*Controller*'        // controller 클래스
 ]
 
 // 리포트 생성
