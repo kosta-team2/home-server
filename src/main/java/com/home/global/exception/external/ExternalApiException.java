@@ -9,6 +9,10 @@ public class ExternalApiException extends BusinessException {
 		super(errorCode, message);
 	}
 
+	public ExternalApiException(ErrorCode errorCode) {
+		super(errorCode);
+	}
+
 	@Override
 	public boolean isNecessaryToLog() {
 		return true;
