@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,10 +24,16 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "region")
 @Filter(name = "softDeleteFilter", condition = "deleted_at IS NULL")
+@SequenceGenerator(
+	name = "region_seq",
+	sequenceName = "region_id_seq",
+	initialValue = 1,
+	allocationSize = 1
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Region extends BaseEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "region_seq")
 	private Long id;
 
 	/** 시·군·구 코드 5자리 */
