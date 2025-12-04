@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface RegionRepository extends JpaRepository<Region, Long> {
 	Optional<Region> findByFullRegionName(String fullRegionName);
+	List<Region> findAllByParent_Id(Long parentId);
+	List<Region> findAllByParentIsNull();
 
 	@Query("SELECT r FROM Region r " +
 		"WHERE r.level = :level " +
