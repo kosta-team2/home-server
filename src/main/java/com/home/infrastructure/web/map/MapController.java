@@ -20,13 +20,11 @@ import java.util.List;
 public class MapController {
 	private final MapUseCase mapUseCase;
 
-	@PostMapping("/get-aggregation/{region}")
-	public ResponseEntity<?> getAggregatedData(@PathVariable("region") String region,
+	@PostMapping("/get-aggregation")
+	public ResponseEntity<?> getAggregatedData(
 		@RequestBody MarkersRequest markersRequest) {
 		log.info("@@@@@@@@@@@@@@@");
-		log.info(region);
 		log.info(markersRequest.toString());
-		List<MarkersResponse> data = MarkersResponse.from(mapUseCase.getAllRegionsByLevelAndBoundary(markersRequest, region));
-		return ResponseEntity.status(HttpStatus.OK).body(data);
+		return ResponseEntity.status(HttpStatus.OK).body(mapUseCase.getAllRegionsByLevelAndBoundary(markersRequest));
 	}
 }

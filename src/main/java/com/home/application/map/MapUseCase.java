@@ -7,6 +7,8 @@ import com.home.global.exception.ErrorCode;
 import com.home.global.exception.external.MapApiException;
 import com.home.infrastructure.web.map.dto.MarkersRequest;
 
+import com.home.infrastructure.web.map.dto.MarkersResponse;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,19 +22,19 @@ import java.util.List;
 public class MapUseCase {
 	private final RegionRepository regionRepository;
 
-	public List<Region> getAllRegionsByLevelAndBoundary(MarkersRequest req, String region) {
-		//log.info("@@map use case 도착@@");
+	public List<MarkersResponse> getAllRegionsByLevelAndBoundary(MarkersRequest req) {
 		RegionLevel regionLevel;
-		if ("si-do".equals(region)) {
+		if ("si-do".equals(req.region())) {
 			regionLevel = RegionLevel.SIDO;
-		} else if ("si-gun-gu".equals(region)) {
+		} else if ("si-gun-gu".equals(req.region())) {
 			regionLevel = RegionLevel.SIGUNGU;
-		} else if ("eup-myeon-dong".equals(region)) {
+		} else if ("eup-myeon-dong".equals(req.region())) {
 			regionLevel = RegionLevel.EUP_MYEON_DONG;
 		} else {
 			throw new MapApiException(ErrorCode.INVALID_PARAMETER);
 		}
-		return regionRepository.findAllRegionByLevelAndBoundary(regionLevel, req.swLat(), req.swLng(),
-			req.neLat(), req.neLng());
+		return MarkersResponse.from(
+			regionRepository.findAllRegionByLevelAndBoundary(regionLevel, req.swLat(), req.swLng(),
+				req.neLat(), req.neLng()));
 	}
 }
