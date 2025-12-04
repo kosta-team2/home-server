@@ -60,4 +60,64 @@ public class Trade extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "complex_id", nullable = false)
 	private Complex complex;
+
+	private Trade(String aptDong, Long dealAmount, LocalDate dealDate, Integer floor, Double exclArea,
+		Complex complex) {
+		this.aptDong = aptDong;
+		this.dealAmount = dealAmount;
+		this.dealDate = dealDate;
+		this.floor = floor;
+		this.exclArea = exclArea;
+		this.complex = complex;
+	}
+
+	public static Trade create(
+		String aptDong,
+		String dealAmount,
+		Integer dealDay,
+		Integer dealMonth,
+		Integer dealYear,
+		Integer floor,
+		Double excluUseAr,
+		Complex complex
+	) {
+		if (dealAmount == null || dealAmount.equals(" ")) {
+			throw new IllegalArgumentException("유효하지 않은 거래 금액: " + dealAmount);
+		}
+		if (dealYear == null || dealMonth == null || dealDay == null) {
+			throw new IllegalArgumentException(
+				"유효하지 않은 거래 일자: " + dealYear + "-" + dealMonth + "-" + dealDay
+			);
+		}
+		if (complex == null) {
+			throw new IllegalArgumentException("Trade 생성 시 Complex는 필수입니다.");
+		}
+
+		// 0층은 사실상 정보 없음으로 처리
+		if (floor != null && floor == 0) {
+			floor = null;
+		}
+
+		LocalDate dealDate = LocalDate.of(dealYear, dealMonth, dealDay);
+		Long parsedAmount = parseDealAmount(dealAmount);
+
+		return new Trade(
+			aptDong,
+			parsedAmount,
+			dealDate,
+			floor,
+			excluUseAr,
+			complex
+		);
+	}
+
+	private static Long parseDealAmount(String rawAmount) {
+		if (rawAmount == null) {
+			throw new IllegalArgumentException("거래금액(dealAmount)이 null 입니다.");
+		}
+
+		String cleaned = rawAmount.replace(",", "").trim();
+
+		return Long.parseLong(cleaned);
+	}
 }

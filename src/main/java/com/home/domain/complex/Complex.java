@@ -36,8 +36,12 @@ public class Complex extends BaseEntity {
 	private Long id;
 
 	/** 단지일련번호 */
-	@Column(name = "apt_seq", nullable = false, unique = true)
+	@Column(name = "apt_seq", unique = true)
 	private String aptSeq;
+
+	/** 단지고유번호 */
+	@Column(name = "complex_pk", nullable = false, unique = true)
+	private String complexPk;
 
 	/** 필자고유번호 */
 	@Column(name = "pnu", nullable = false)
@@ -99,4 +103,27 @@ public class Complex extends BaseEntity {
 	@JoinColumn(name = "region_id", nullable = false)
 	private Region region;
 
+	/**
+	 * 아파트 단지를 실거래가와 연결할 aptSeq를 설정할 때 사용
+	 * */
+	public void updateAptSeq(String newSeq) {
+		if (newSeq == null || newSeq.isBlank()) {
+			throw new IllegalArgumentException("새 aptSeq 값이 비어 있습니다.");
+		}
+
+		if (this.aptSeq == null || this.aptSeq.isBlank()) {
+			this.aptSeq = newSeq;
+			return;
+		}
+
+		//같은 값이면 무시
+		if (this.aptSeq.equals(newSeq)) {
+			return;
+		}
+
+		//위 조건을 통과하지 못하면 에러로 판단.
+		throw new IllegalStateException(
+			"aptSeq 값이 이미 존재합니다. 기존=" + this.aptSeq + ", 새=" + newSeq
+		);
+	}
 }
