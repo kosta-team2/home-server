@@ -39,14 +39,12 @@ class RegionUseCaseTest {
 			// given
 			Long regionId = 1L;
 
-			// 부모 Region (서울특별시)
 			Region parent = mock(Region.class);
 			given(parent.getId()).willReturn(regionId);
 			given(parent.getRegionName()).willReturn("서울특별시");
 			given(parent.getLatitude()).willReturn(37.56487638055266);
 			given(parent.getLongitude()).willReturn(126.97413944268415);
 
-			// 자식 Region들
 			Region jongno = mock(Region.class);
 			given(jongno.getId()).willReturn(2L);
 			given(jongno.getRegionName()).willReturn("종로구");
@@ -59,7 +57,6 @@ class RegionUseCaseTest {
 			given(yongsan.getId()).willReturn(165L);
 			given(yongsan.getRegionName()).willReturn("용산구");
 
-			// repository stub
 			given(regionRepository.findById(regionId))
 				.willReturn(Optional.of(parent));
 			given(regionRepository.findAllByParent_Id(regionId))
@@ -75,7 +72,6 @@ class RegionUseCaseTest {
 			assertThat(response.getLatitude()).isEqualTo(37.56487638055266);
 			assertThat(response.getLongitude()).isEqualTo(126.97413944268415);
 
-			// children 개수 & 값 검증 (JSON 예시와 맞춰서)
 			assertThat(response.getChildren())
 				.hasSize(3)
 				.extracting("id")
