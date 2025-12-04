@@ -33,7 +33,7 @@ public class RegionUseCase {
 		return RegionDetailResponse.of(region, children);
 	}
 
-	public List<RootRegionResponse> getRegionByParentId() {
+	public List<RootRegionResponse> getRootRegion() {
 		List<Region> regions = regionRepository.findAllByParentIsNull();
 
 		return regions.stream()

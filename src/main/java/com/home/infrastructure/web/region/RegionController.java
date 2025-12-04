@@ -30,7 +30,7 @@ public class RegionController {
 
 	@GetMapping
 	public ResponseEntity<List<RootRegionResponse>> getRegionsById() {
-		List<RootRegionResponse> list = regionUseCase.getRegionByParentId();
+		List<RootRegionResponse> list = regionUseCase.getRootRegion();
 
 		return ResponseEntity.status(HttpStatus.OK).body(list);
 	}
