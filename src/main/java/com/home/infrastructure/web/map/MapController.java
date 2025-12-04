@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/map")
+@RequestMapping("api/v1/map")
 @RequiredArgsConstructor
 @Slf4j
 public class MapController {
@@ -23,8 +23,6 @@ public class MapController {
 	@PostMapping("/get-aggregation")
 	public ResponseEntity<?> getAggregatedData(
 		@RequestBody MarkersRequest markersRequest) {
-		log.info("@@@@@@@@@@@@@@@");
-		log.info(markersRequest.toString());
 		return ResponseEntity.status(HttpStatus.OK).body(mapUseCase.getAllRegionsByLevelAndBoundary(markersRequest));
 	}
 }
