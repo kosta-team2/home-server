@@ -58,6 +58,8 @@ public class OdcloudClient {
 			.uri(uriBuilder -> uriBuilder
 				.path(dongPath)
 				.queryParam("cond[COMPLEX_PK::EQ]", cond)
+				.queryParam("page", 1)
+				.queryParam("perPage", 100)
 				.queryParam("serviceKey", odServiceKey)
 				.build())
 			.retrieve()

@@ -63,7 +63,7 @@ public class ApisAptTradeResponse {
 	 * aptSeq: 단지 일련번호(1)
 	 * bonbun: 법정동본번코드(0)
 	 * bubun: 법정동부번코드(0)
-	 * buildYear: 계약년도(1)
+	 * buildYear: 건축년도(0)
 	 * dealAmount: 거래금액(1)
 	 * dealDay: 계약일(1)
 	 * dealMonth: 계약월(1)
