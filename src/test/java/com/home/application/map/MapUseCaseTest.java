@@ -1,13 +1,16 @@
 package com.home.application.map;
 
 import com.home.annotations.MockTest;
+import com.home.domain.complex.Complex;
+import com.home.domain.complex.ComplexRepository;
 import com.home.domain.region.Region;
 import com.home.domain.region.RegionLevel;
 import com.home.domain.region.RegionRepository;
 import com.home.global.exception.ErrorCode;
 import com.home.global.exception.external.MapApiException;
+import com.home.infrastructure.web.map.dto.ComplexMarkersResponse;
 import com.home.infrastructure.web.map.dto.MarkersRequest;
-import com.home.infrastructure.web.map.dto.MarkersResponse;
+import com.home.infrastructure.web.map.dto.RegionMarkersResponse;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +32,9 @@ class MapUseCaseTest {
 	@Mock
 	private RegionRepository regionRepository;
 
+	@Mock
+	private ComplexRepository complexRepository;
+
 	@InjectMocks
 	private MapUseCase mapUseCase;
 
@@ -46,7 +52,7 @@ class MapUseCaseTest {
 		)).willReturn(List.of(region));
 
 		// when
-		List<MarkersResponse> result = mapUseCase.getAllRegionsByLevelAndBoundary(req);
+		List<RegionMarkersResponse> result = mapUseCase.getAllRegionsByLevelAndBoundary(req);
 
 		// then
 		assertThat(result).isNotNull();
@@ -71,7 +77,7 @@ class MapUseCaseTest {
 		)).willReturn(List.of(region));
 
 		// when
-		List<MarkersResponse> result = mapUseCase.getAllRegionsByLevelAndBoundary(req);
+		List<RegionMarkersResponse> result = mapUseCase.getAllRegionsByLevelAndBoundary(req);
 
 		// then
 		assertThat(result).isNotNull();
@@ -95,7 +101,7 @@ class MapUseCaseTest {
 		)).willReturn(List.of(region));
 
 		// when
-		List<MarkersResponse> result = mapUseCase.getAllRegionsByLevelAndBoundary(req);
+		List<RegionMarkersResponse> result = mapUseCase.getAllRegionsByLevelAndBoundary(req);
 
 		// then
 		assertThat(result).isNotNull();
@@ -119,4 +125,27 @@ class MapUseCaseTest {
 				assertThat(e.getErrorCode()).isEqualTo(ErrorCode.INVALID_PARAMETER);
 			});
 	}
+
+	@Test
+	@DisplayName("경계값으로 단지(Complex)를 조회한다")
+	void getComplexesByBoundary_success() {
+		// given
+		MarkersRequest req = new MarkersRequest(10.0, 20.0, 30.0, 40.0, "complex"); // region 값은 사용되지 않음
+		Complex complex = mock(Complex.class);
+
+		given(complexRepository.findAllByBoundary(
+			eq(10.0), eq(20.0),
+			eq(30.0), eq(40.0)
+		)).willReturn(List.of(complex));
+
+		// when
+		List<ComplexMarkersResponse> result = mapUseCase.getComplexesByBoundary(req);
+
+		// then
+		assertThat(result).isNotNull();
+		// ComplexMarkersResponse.from(...)이 Complex 리스트 크기만큼 응답을 만든다고 가정
+		assertThat(result).hasSize(1);
+		verify(complexRepository).findAllByBoundary(10.0, 20.0, 30.0, 40.0);
+	}
 }
+
