@@ -19,14 +19,12 @@ public class MapController {
 
 	@PostMapping("/complexes")
 	public ResponseEntity<?> getComplexMarkers(@RequestBody MarkersRequest markersRequest) {
-		log.info("markersRequest={}", markersRequest);
 		return ResponseEntity.status(HttpStatus.OK).body(mapUseCase.getComplexesByBoundary(markersRequest));
 	}
 
 	@PostMapping("/regions")
 	public ResponseEntity<?> getRegionMarkers(
 		@RequestBody MarkersRequest markersRequest) {
-		log.info(markersRequest.toString());
 		return ResponseEntity.status(HttpStatus.OK).body(mapUseCase.getAllRegionsByLevelAndBoundary(markersRequest));
 	}
 }
