@@ -1,13 +1,14 @@
 package com.home.application.map;
 
-import com.home.domain.region.Region;
+import com.home.domain.complex.ComplexRepository;
 import com.home.domain.region.RegionLevel;
 import com.home.domain.region.RegionRepository;
 import com.home.global.exception.ErrorCode;
 import com.home.global.exception.external.MapApiException;
+import com.home.infrastructure.web.map.dto.ComplexMarkersResponse;
 import com.home.infrastructure.web.map.dto.MarkersRequest;
 
-import com.home.infrastructure.web.map.dto.MarkersResponse;
+import com.home.infrastructure.web.map.dto.RegionMarkersResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +22,9 @@ import java.util.List;
 @Slf4j
 public class MapUseCase {
 	private final RegionRepository regionRepository;
+	private final ComplexRepository complexRepository;
 
-	public List<MarkersResponse> getAllRegionsByLevelAndBoundary(MarkersRequest req) {
+	public List<RegionMarkersResponse> getAllRegionsByLevelAndBoundary(MarkersRequest req) {
 		RegionLevel regionLevel;
 		if ("si-do".equals(req.region())) {
 			regionLevel = RegionLevel.SIDO;
@@ -33,8 +35,14 @@ public class MapUseCase {
 		} else {
 			throw new MapApiException(ErrorCode.INVALID_PARAMETER);
 		}
-		return MarkersResponse.from(
+		return RegionMarkersResponse.from(
 			regionRepository.findAllRegionByLevelAndBoundary(regionLevel, req.swLat(), req.swLng(),
 				req.neLat(), req.neLng()));
+	}
+
+	public List<ComplexMarkersResponse> getComplexesByBoundary(MarkersRequest req) {
+		return ComplexMarkersResponse.from(
+			complexRepository.findAllByBoundary(req.swLat(), req.swLng(), req.neLat(), req.neLng())
+		);
 	}
 }
