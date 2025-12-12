@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:16
+    image: postgis/postgis:16-3.4
     container_name: home-postgres
     restart: unless-stopped
     environment:
@@ -24,26 +24,6 @@ services:
         limits:
           cpus: "2"  # 최대 2개의 코어 할당
           memory: 2GB   # 최대 2GB 메모리 할당
-    networks:
-      - home
-
-  app:
-    build: .
-    container_name: home-app
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/home
-      SPRING_DATASOURCE_USERNAME: home_user
-      SPRING_DATASOURCE_PASSWORD: home1234
-      APT_SERVICE_KEY: ${APT_SERVICE_KEY}
-      BLD_SERVICE_KEY: ${BLD_SERVICE_KEY}
-      ODC_SERVICE_KEY: ${ODC_SERVICE_KEY}
-      VW_SERVICE_KEY: ${VW_SERVICE_KEY}
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
       - home
 

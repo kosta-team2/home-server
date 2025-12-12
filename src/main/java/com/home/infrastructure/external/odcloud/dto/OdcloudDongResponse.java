@@ -1,6 +1,9 @@
 package com.home.infrastructure.external.odcloud.dto;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -44,5 +47,22 @@ public class OdcloudDongResponse {
 		private String dongNm3;
 		@JsonProperty("GRND_FLR_CNT")
 		private Integer grndFlrCnt;
+	}
+
+	public List<OdcloudDongDto> toDongDto() {
+		if (data == null) {
+			return List.of();
+		}
+
+		return data.stream()
+			.flatMap(item -> Stream.of(
+					item.getDongNm1(),
+					item.getDongNm2()
+				)
+				.filter(Objects::nonNull)
+				.map(String::trim)
+				.filter(s -> !s.isEmpty())
+				.map(OdcloudDongDto::new))
+			.collect(Collectors.toList());
 	}
 }

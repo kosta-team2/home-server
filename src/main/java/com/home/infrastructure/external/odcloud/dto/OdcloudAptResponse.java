@@ -60,4 +60,23 @@ public class OdcloudAptResponse {
 		@JsonProperty("USEAPR_DT")
 		private String useaprDt;
 	}
+
+	public List<OdcloudAptDto> toAptDto() {
+		if (data == null) {
+			return List.of();
+		}
+
+		return data.stream()
+			.map(item -> new OdcloudAptDto(
+				item.getAddress(),
+				item.getComplexGbCd(),
+				item.getComplexNm1(),
+				item.getComplexNm2(),
+				item.getComplexPk(),
+				item.getDongCnt(),
+				item.getPnu(),
+				item.getUnitCnt()
+			))
+			.toList();
+	}
 }

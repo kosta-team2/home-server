@@ -50,6 +50,8 @@ public class VworldClient {
 				.queryParam("pnu", pnu)
 				.queryParam("domain", domain)
 				.queryParam("srsName", "EPSG:4326")
+				.queryParam("pageNo", 1)
+				.queryParam("numOfRows", 100)
 				.build())
 			.retrieve()
 			.body(VworldgisResponse.class);

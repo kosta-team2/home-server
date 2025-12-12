@@ -38,10 +38,12 @@ public class OdcloudClient {
 	 * 한국부동산원_공동주택 단지 식별정보 기본 정보 조회 서비스
 	 * @param cond [ADRES::LIKE] = 주소 LIKE 검색 (예: "백석동 1183")
 	 */
-	public OdcloudAptResponse getAptInfo(String cond) {
+	public OdcloudAptResponse getAptInfo(String cond, int page, int size) {
 		return client.get()
 			.uri(uriBuilder -> uriBuilder
 				.path(aptPath)
+				.queryParam("page", page)
+				.queryParam("perPage", size)
 				.queryParam("cond[ADRES::LIKE]", cond)
 				.queryParam("serviceKey", odServiceKey)
 				.build())

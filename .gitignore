@@ -43,3 +43,6 @@ out/
 *.pem
 .env
 .profileconfig.json
+
+### PostGIS ###
+AL_D010_11_20251204

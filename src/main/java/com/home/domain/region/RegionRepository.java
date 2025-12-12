@@ -23,4 +23,8 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 		@Param("neLat") Double neLat,
 		@Param("neLng") Double neLng
 	);
+
+	List<Region> findAllByLevel(RegionLevel level);
+
+	Optional<Region> findBySggCodeAndEmdCode(String sggCode, String emdCode);
 }

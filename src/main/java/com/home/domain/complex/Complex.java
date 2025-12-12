@@ -1,9 +1,11 @@
 package com.home.domain.complex;
 
+import java.time.LocalDate;
+
 import org.hibernate.annotations.Filter;
 
 import com.home.domain.common.BaseEntity;
-import com.home.domain.region.Region;
+import com.home.domain.parcel.Parcel;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,12 +46,8 @@ public class Complex extends BaseEntity {
 	private String complexPk;
 
 	/** 필자고유번호 */
-	@Column(name = "pnu", nullable = false)
+	@Column(name = "pnu", length = 19)
 	private String pnu;
-
-	/** 주소(대지위치) ex) 경기도 고양시 일산동구 백석동 1183번지 */
-	@Column(name = "address", nullable = false)
-	private String address;
 
 	/** 단지명_공시가격 */
 	@Column(name = "trade_name", nullable = false)
@@ -58,14 +56,6 @@ public class Complex extends BaseEntity {
 	/** 단지명_건축물대 */
 	@Column(name = "name", nullable = false)
 	private String name;
-
-	/** 단지 대표 경도 (x, EPSG:4326 기준) */
-	@Column(name = "longitude")
-	private Double longitude;
-
-	/** 단지 대표 위도 (y, EPSG:4326 기준) */
-	@Column(name = "latitude")
-	private Double latitude;
 
 	/** 동수 */
 	@Column(name = "dong_cnt")
@@ -95,13 +85,72 @@ public class Complex extends BaseEntity {
 	@Column(name = "vl_rat")
 	private Double vlRat;
 
-	/** 건축년도 */
-	@Column(name = "build_year")
-	private Integer buildYear;
+	/** 사용승인일 */
+	@Column(name = "use_date")
+	private LocalDate useDate;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "region_id", nullable = false)
-	private Region region;
+	@JoinColumn(name = "parcel_id")
+	private Parcel parcel;
+
+	private Complex(
+		String aptSeq,
+		String complexPk,
+		String pnu,
+		String tradeName,
+		String name,
+		Integer dongCnt,
+		Integer unitCnt,
+		Double platArea,
+		Double archArea,
+		Double totArea,
+		Double bcRat,
+		Double vlRat,
+		LocalDate useDate,
+		Parcel parcel
+	) {
+		this.aptSeq = aptSeq;
+		this.complexPk = complexPk;
+		this.pnu = pnu;
+		this.tradeName = tradeName;
+		this.name = name;
+		this.dongCnt = dongCnt;
+		this.unitCnt = unitCnt;
+		this.platArea = platArea;
+		this.archArea = archArea;
+		this.totArea = totArea;
+		this.bcRat = bcRat;
+		this.vlRat = vlRat;
+		this.useDate = useDate;
+		this.parcel = parcel;
+	}
+
+	public static Complex create(
+		String complexPk,
+		String pnu,
+		String tradeName,
+		String name,
+		Integer dongCnt,
+		Integer unitCnt,
+		Double platArea,
+		Double archArea,
+		Double totArea,
+		Double bcRat,
+		Double vlRat,
+		LocalDate useDate,
+		Parcel parcel
+	) {
+		if (tradeName == null || tradeName.isEmpty()) {
+			tradeName = name;
+		}
+
+		if (name == null || name.isEmpty()) {
+			name = tradeName;
+		}
+
+		return new Complex(null, complexPk, pnu, tradeName, name,
+			dongCnt, unitCnt, platArea, archArea, totArea, bcRat, vlRat, useDate, parcel);
+	}
 
 	/**
 	 * 아파트 단지를 실거래가와 연결할 aptSeq를 설정할 때 사용

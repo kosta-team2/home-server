@@ -70,9 +70,9 @@ public class ApisAptTradeResponse {
 	 * dealYear: 계약년도(1)
 	 * excluUseAr: 전용면적(0)
 	 * floor: 층(0)
-	 * jibun: 지번(0)
+	 * jibun: 지번(0): int or String
 	 * sggCd: 법정동시군구코드(1)
-	 * umdNm: 법정동읍면동코드(1)
+	 * umdCd: 법정동읍면동코드(1)
 	 * */
 	@Getter
 	@Setter
@@ -91,7 +91,33 @@ public class ApisAptTradeResponse {
 		private Double excluUseAr;
 		private Integer floor;
 		private String jibun;
-		private Integer sggCd;
-		private String umdNm;
+		private String sggCd;
+		private String umdCd;
+	}
+
+	public List<ApisAptTradeDto> toApisDto() {
+		if (response.getBody().getItems() == null) {
+			return List.of();
+		}
+
+		return response.getBody().getItems().getItem().stream()
+			.map(item -> new ApisAptTradeDto(
+				item.getAptDong(),
+				item.getAptNm(),
+				item.getAptSeq(),
+				item.getBonbun(),
+				item.getBubun(),
+				item.getBuildYear(),
+				item.getDealAmount(),
+				item.getDealDay(),
+				item.getDealMonth(),
+				item.getDealYear(),
+				item.getExcluUseAr(),
+				item.getFloor(),
+				item.getJibun(),
+				item.getSggCd(),
+				item.getUmdCd()
+			))
+			.toList();
 	}
 }

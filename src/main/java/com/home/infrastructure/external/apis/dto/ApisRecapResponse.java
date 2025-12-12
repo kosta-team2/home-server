@@ -8,15 +8,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 국토교통부_건축HUB_건축물대장정보 서비스:총괄표제부 조회 DTO
- * 필수 (1), 옵션(0)
- * */
+ * 국토교통부_건축HUB_건축물대장정보 서비스:표제부 조회 DTO
+ */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ApisBldRecapResponse {
+public class ApisRecapResponse {
 
-	@JsonIgnoreProperties(ignoreUnknown = true)
 	private Response response;
 
 	@Getter
