@@ -53,7 +53,7 @@ public class VworldAreaResponse {
 		private List<Double> bbox;
 	}
 
-	public VworldAreaCoordinateResponse toCoordinate() {
+	public VworldCoordDto toCoordinate() {
 		if (response.status.trim().equals("NOT_FOUND")) {
 			throw new ExternalApiException(ErrorCode.EXTERNAL_API_ERROR, "VWorld 행정구역에 대한 정보를 찾기 못했습니다.");
 		}
@@ -69,7 +69,7 @@ public class VworldAreaResponse {
 		double longitude = (minX + maxX) / 2.0;
 		double latitude = (minY + maxY) / 2.0;
 
-		return new VworldAreaCoordinateResponse(longitude, latitude);
+		return new VworldCoordDto(longitude, latitude);
 	}
 
 }

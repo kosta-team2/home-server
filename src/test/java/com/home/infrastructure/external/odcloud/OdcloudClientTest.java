@@ -49,7 +49,7 @@ class OdcloudClientTest {
 			.setBody(APT_JSON)
 		);
 
-		OdcloudAptResponse res = client.getAptInfo("영통동 955-1");
+		OdcloudAptResponse res = client.getAptInfo("영통동 955-1", 1, 1000);
 
 		assertThat(res.getCurrentCount()).isEqualTo(1);
 		assertThat(res.getPage()).isEqualTo(1);

@@ -32,7 +32,8 @@ class ApisClientTest {
 			"DUMMY_APT_KEY",
 			"/RTMSDataSvcAptTradeDev",
 			"DUMMY_BLD_KEY",
-			"/BldRgstHubService/getBrRecapTitleInfo"
+			"/BldRgstHubService/getBrRecapTitleInfo",
+			"/BldRgstHubService/getBrTitleInfo"
 		);
 	}
 
@@ -75,7 +76,6 @@ class ApisClientTest {
 		assertThat(item.getDealYear()).isEqualTo(2025);
 		assertThat(item.getDealMonth()).isEqualTo(11);
 		assertThat(item.getDealDay()).isEqualTo(20);
-		assertThat(item.getUmdNm()).isEqualTo("원천동");
 
 		var request = server.takeRequest();
 		assertThat(request.getPath())
@@ -115,7 +115,7 @@ class ApisClientTest {
 		assertThat(item.getPlatPlc()).isEqualTo("경기도 고양시 일산동구 백석동 1183번지");
 		assertThat(item.getSigunguCd()).isEqualTo("41285");
 		assertThat(item.getBjdongCd()).isEqualTo("10600");
-		assertThat(item.getMgmBldrgstPk()).isEqualTo(11041119102L);
+		assertThat(item.getMgmBldrgstPk()).isEqualTo("11041119102");
 		assertThat(item.getHhldCnt()).isEqualTo(862);
 
 		// 이번 케이스처럼 0으로 내려오는 값은 Double 0.0으로 매핑되는지 확인

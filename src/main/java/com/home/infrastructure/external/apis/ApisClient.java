@@ -1,15 +1,19 @@
 package com.home.infrastructure.external.apis;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 import com.home.infrastructure.external.apis.dto.ApisAptTradeResponse;
 import com.home.infrastructure.external.apis.dto.ApisBldRecapResponse;
+import com.home.infrastructure.external.apis.dto.ApisRecapResponse;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class ApisClient {
 
 	private final RestClient client;
@@ -18,23 +22,30 @@ public class ApisClient {
 	private final String aptPath;
 	private final String bldServiceKey;
 	private final String bldPath;
+	private final String recapPath;
 
 	public ApisClient(
 		@Value("${apis.data.base-url}") String baseUrl,
 		@Value("${apis.data.apt-service-key}") String aptServiceKey,
 		@Value("${apis.data.apt-title-path}") String aptPath,
 		@Value("${apis.data.bld-service-key}") String bldServiceKey,
-		@Value("${apis.data.bld-title-path}") String bldPath
+		@Value("${apis.data.bld-title-path}") String bldPath,
+		@Value("${apis.data.recap-title-path}") String recapPath
 	) {
+		var factory = new SimpleClientHttpRequestFactory();
+		factory.setConnectTimeout(5_000);
+		factory.setReadTimeout(5_000);
+
 		this.client = RestClient.builder()
+			.requestFactory(factory)
 			.baseUrl(baseUrl)
-			.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 			.build();
 
 		this.aptServiceKey = aptServiceKey;
 		this.aptPath = aptPath;
 		this.bldServiceKey = bldServiceKey;
 		this.bldPath = bldPath;
+		this.recapPath = recapPath;
 	}
 
 	/**
@@ -79,19 +90,58 @@ public class ApisClient {
 		String bun,
 		String ji
 	) {
-		return client.get()
-			.uri(uriBuilder -> uriBuilder
-				.path(bldPath)
-				.queryParam("_type", "json")
-				.queryParam("serviceKey", bldServiceKey)
-				.queryParam("sigunguCd", sigunguCd)
-				.queryParam("bjdongCd", bjdongCd)
-				.queryParam("bun", bun)
-				.queryParam("ji", ji)
-				.build())
-			.retrieve()
-			.body(ApisBldRecapResponse.class);
+		try {
+			return client.get()
+				.uri(uriBuilder -> uriBuilder
+					.path(bldPath)
+					.queryParam("_type", "json")
+					.queryParam("serviceKey", bldServiceKey)
+					.queryParam("sigunguCd", sigunguCd)
+					.queryParam("bjdongCd", bjdongCd)
+					.queryParam("bun", bun)
+					.queryParam("ji", ji)
+					.build())
+				.retrieve()
+				.body(ApisBldRecapResponse.class);
+		} catch (RestClientException e) {
+			log.warn("[BldRecap] 호출 중 예외 발생. s={}, b={}, bun={}, ji={}",
+				sigunguCd, bjdongCd, bun, ji, e);
+			return null;
+		}
 	}
 
+	/**
+	 * 국토교통부_건축HUB_건축물대장정보 서비스: 표제부
+	 * serviceKey 인증키
+	 * @param sigunguCd 시군구코드
+	 * @param bjdongCd 법정동코드
+	 * @param bun 번
+	 * @param ji 지
+	 */
+	public ApisRecapResponse getRecap(
+		String sigunguCd,
+		String bjdongCd,
+		String bun,
+		String ji
+	) {
+		try {
+			return client.get()
+				.uri(uriBuilder -> uriBuilder
+					.path(recapPath)
+					.queryParam("_type", "json")
+					.queryParam("serviceKey", bldServiceKey)
+					.queryParam("sigunguCd", sigunguCd)
+					.queryParam("bjdongCd", bjdongCd)
+					.queryParam("bun", bun)
+					.queryParam("ji", ji)
+					.build())
+				.retrieve()
+				.body(ApisRecapResponse.class);
+		} catch (RestClientException e) {
+			log.warn("[Recap] 호출 중 예외 발생. s={}, b={}, bun={}, ji={}",
+				sigunguCd, bjdongCd, bun, ji, e);
+			return null;
+		}
+	}
 
 }
