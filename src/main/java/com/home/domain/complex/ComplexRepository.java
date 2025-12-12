@@ -21,4 +21,7 @@ public interface ComplexRepository extends JpaRepository<Complex, Long> {
 		@Param("neLat") Double neLat,
 		@Param("neLng") Double neLng
 	);
+
+	List<Complex> findAllByParcel_Id(Long parcelId);
+
 }

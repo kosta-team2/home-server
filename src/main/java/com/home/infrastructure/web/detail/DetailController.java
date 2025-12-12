@@ -22,7 +22,7 @@ public class DetailController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<DetailResponse> getDetailById(@PathVariable Long id) {
-		DetailResponse response = detailUseCase.findById(id);
+		DetailResponse response = detailUseCase.findByParcelId(id);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
