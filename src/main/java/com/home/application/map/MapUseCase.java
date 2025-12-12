@@ -1,6 +1,6 @@
 package com.home.application.map;
 
-import com.home.domain.complex.ComplexRepository;
+import com.home.domain.parcel.ParcelRepository;
 import com.home.domain.region.RegionLevel;
 import com.home.domain.region.RegionRepository;
 import com.home.global.exception.ErrorCode;
@@ -22,7 +22,7 @@ import java.util.List;
 @Slf4j
 public class MapUseCase {
 	private final RegionRepository regionRepository;
-	private final ComplexRepository complexRepository;
+	private final ParcelRepository parcelRepository;
 
 	public List<RegionMarkersResponse> getAllRegionsByLevelAndBoundary(MarkersRequest req) {
 		RegionLevel regionLevel;
@@ -41,8 +41,8 @@ public class MapUseCase {
 	}
 
 	public List<ComplexMarkersResponse> getComplexesByBoundary(MarkersRequest req) {
-		return ComplexMarkersResponse.from(
-			complexRepository.findAllByBoundary(req.swLat(), req.swLng(), req.neLat(), req.neLng())
+		return ComplexMarkersResponse.fromParcelAgg(
+			parcelRepository.findParcelMarkersByBoundary(req.swLat(), req.swLng(), req.neLat(), req.neLng())
 		);
 	}
 }
