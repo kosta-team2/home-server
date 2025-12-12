@@ -1,3 +1,54 @@
 spring:
   profiles:
     default: local
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none         # 기본은 none, 각 프로필에서 필요시 override
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 500
+        order_inserts: true
+        order_updates: true
+        format_sql: true
+
+  flyway:
+    enabled: false           # 기본은 모두 OFF
+    locations: classpath:db/migration
+
+logging:
+  level:
+    root: info
+
+apis:
+  data:
+    base-url: https://apis.data.go.kr
+    # 국토교통부_아파트 매매 실거래가 상세 자료
+    apt-service-key: ${APT_SERVICE_KEY}
+    apt-title-path: /1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev
+    # 국토교통부_건축HUB_건축물대장정보 서비스:총괄표제부 조회
+    bld-service-key: ${BLD_SERVICE_KEY}
+    bld-title-path: /1613000/BldRgstHubService/getBrRecapTitleInfo
+    # 국토교통부_건축HUB_건축물대장정보 서비스: 표제부 조회
+    recap-title-path: /1613000/BldRgstHubService/getBrTitleInfo
+
+odcloud:
+  data:
+    base-url: https://api.odcloud.kr
+    od-service-key: ${ODC_SERVICE_KEY}
+    # 한국부동산원_공동주택 단지 식별정보 기본 정보 조회 서비스
+    apt-title-path: /api/AptIdInfoSvc/v1/getAptInfo
+    # 한국부동산원_공동주택 단지 식별정보 동정보 조회 서비스
+    dong-title-path: /api/AptIdInfoSvc/v1/getDongInfo
+
+vworld:
+  data:
+    base-url: https://api.vworld.kr
+    vw-service-key: ${VW_SERVICE_KEY}
+    vm-domain: http://localhost:8080/only-local-test
+    # 국토교통부_GIS_건물통합_WFS_조회
+    vm-wfs-path: /ned/wfs/getBldgisSpceWFS
+    # 2D데이터 API 2.0 레퍼런스
+    vm-data-path: /req/data
