@@ -3,6 +3,7 @@ package com.home.application.region;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.home.domain.region.Region;
 import com.home.domain.region.RegionRepository;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RegionUseCase {
 	private final RegionRepository regionRepository;
 
+	@Transactional(readOnly = true)
 	public RegionDetailResponse getRegionInfoWithChildren(Long id) {
 		Region region = regionRepository.findById(id)
 			.orElseThrow(RuntimeException::new); // todo 예외처리
@@ -28,6 +30,7 @@ public class RegionUseCase {
 		return RegionDetailResponse.of(region, children);
 	}
 
+	@Transactional(readOnly = true)
 	public List<RootRegionResponse> getRootRegion() {
 		List<Region> regions = regionRepository.findAllByParentIsNull();
 
