@@ -69,6 +69,9 @@ dependencies {
     testImplementation 'com.epages:restdocs-api-spec-mockmvc:0.19.4'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
 }
 
 ext {
@@ -113,19 +116,19 @@ openapi3 {
 
 
 bootJar {
-    dependsOn 'asciidoctor', 'openapi3'
-
-    from("swagger-ui") {
-        into "BOOT-INF/classes/static/swagger"
-    }
-
-    from("${asciidoctor.outputDir}") {
-        into 'BOOT-INF/classes/static/docs'
-    }
-
-    from(layout.buildDirectory.dir("api-spec")) {
-        into 'BOOT-INF/classes/static/swagger'
-    }
+//    dependsOn 'asciidoctor', 'openapi3'
+//
+//    from("swagger-ui") {
+//        into "BOOT-INF/classes/static/swagger"
+//    }
+//
+//    from("${asciidoctor.outputDir}") {
+//        into 'BOOT-INF/classes/static/docs'
+//    }
+//
+//    from(layout.buildDirectory.dir("api-spec")) {
+//        into 'BOOT-INF/classes/static/swagger'
+//    }
 }
 
 // 한 방 검증 파이프라인(이름: verify)
