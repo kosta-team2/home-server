@@ -5,9 +5,9 @@ import com.home.domain.region.RegionLevel;
 import com.home.domain.region.RegionRepository;
 import com.home.global.exception.ErrorCode;
 import com.home.global.exception.external.MapApiException;
-import com.home.infrastructure.web.map.dto.ComplexMarkersResponse;
 import com.home.infrastructure.web.map.dto.MarkersRequest;
 
+import com.home.infrastructure.web.map.dto.ParcelMarkerResponse;
 import com.home.infrastructure.web.map.dto.RegionMarkersResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -40,9 +40,7 @@ public class MapUseCase {
 				req.neLat(), req.neLng()));
 	}
 
-	public List<ComplexMarkersResponse> getComplexesByBoundary(MarkersRequest req) {
-		return ComplexMarkersResponse.fromParcelAgg(
-			parcelRepository.findParcelMarkersByBoundary(req.swLat(), req.swLng(), req.neLat(), req.neLng())
-		);
+	public List<ParcelMarkerResponse> getComplexesByBoundary(MarkersRequest req) {
+		return parcelRepository.findParcelMarkersByBoundary(req.swLat(), req.swLng(), req.neLat(), req.neLng());
 	}
 }
