@@ -16,7 +16,7 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DetailResponse {
 
-	private Long id;
+	private Long parcelId;
 	private Double latitude;
 	private Double longitude;
 	private String address;     // 주소
@@ -36,7 +36,7 @@ public class DetailResponse {
 			return null;	// todo 예외처리 Illegal
 		}
 		return DetailResponse.builder()
-			.id(parcel.getId())
+			.parcelId(parcel.getId())
 			.latitude(parcel.getLatitude())
 			.longitude(parcel.getLongitude())
 			.address(parcel.getAddress())
@@ -49,7 +49,7 @@ public class DetailResponse {
 		}
 
 		return DetailResponse.builder()
-			.id(parcel.getId())
+			.parcelId(parcel.getId())
 			.latitude(parcel.getLatitude())
 			.longitude(parcel.getLongitude())
 			.address(parcel.getAddress())

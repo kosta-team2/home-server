@@ -82,7 +82,7 @@ class DetailUseCaseTest {
 			// then
 			assertThat(response).isNotNull();
 			// Parcel 기반 필드
-			assertThat(response.getId()).isEqualTo(parcelId);
+			assertThat(response.getParcelId()).isEqualTo(parcelId);
 			assertThat(response.getLatitude()).isEqualTo(37.123456);
 			assertThat(response.getLongitude()).isEqualTo(127.123456);
 			assertThat(response.getAddress()).isEqualTo("서울특별시 어딘가 123");
@@ -133,7 +133,7 @@ class DetailUseCaseTest {
 			assertThat(response).isNotNull();
 
 			// Parcel 기반 필드만 채워져 있어야 함
-			assertThat(response.getId()).isEqualTo(parcelId);
+			assertThat(response.getParcelId()).isEqualTo(parcelId);
 			assertThat(response.getLatitude()).isEqualTo(37.123456);
 			assertThat(response.getLongitude()).isEqualTo(127.123456);
 			assertThat(response.getAddress()).isEqualTo("서울특별시 어딘가 123");

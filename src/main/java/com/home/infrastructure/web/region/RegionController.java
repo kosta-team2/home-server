@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/move")
+@RequestMapping("/api/v1/region")
 public class RegionController {
 	private final RegionUseCase regionUseCase;
 
