@@ -1,6 +1,5 @@
 package com.home.application.detail;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -13,8 +12,8 @@ import com.home.domain.parcel.ParcelRepository;
 import com.home.domain.trade.Trade;
 import com.home.domain.trade.TradeRepository;
 import com.home.infrastructure.web.detail.dto.ChartFilterRequest;
-import com.home.infrastructure.web.detail.dto.TradeResponse;
 import com.home.infrastructure.web.detail.dto.DetailResponse;
+import com.home.infrastructure.web.detail.dto.TradeResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,16 +44,10 @@ public class DetailUseCase {
 		List<Long> complexIds = complexRepository.findAllIdsByParcel_Id(parcelId);
 		if (complexIds.isEmpty()) { throw new IllegalArgumentException(); }	//todo 예외처리
 		log.info("complexIds: {}", complexIds);
-		List<Trade> totalTrades = new ArrayList<>();
 
-		for (Long complexId : complexIds) {
-			List<Trade> trades = tradeRepository.findByComplex_Id(complexId);
-			for (Trade trade : trades) {
-				totalTrades.add(trade);
-			}
-		}
+		List<Trade> trades = tradeRepository.findByComplex_IdIn(complexIds);
 
-		return TradeResponse.from(parcelId, totalTrades);
+		return TradeResponse.from(parcelId, trades);
 	}
 
 	@Transactional(readOnly = true)
@@ -62,16 +55,10 @@ public class DetailUseCase {
 		List<Long> complexIds = complexRepository.findAllIdsByParcel_Id(parcelId);
 		if (complexIds.isEmpty()) { throw new IllegalArgumentException(); }	//todo 예외처리
 		log.info("complexIds: {}", complexIds);
-		List<Trade> totalTrades = new ArrayList<>();
 
-		for (Long complexId : complexIds) {
-			List<Trade> trades = tradeRepository.findByComplex_IdWithFilter(complexId, request.startDate(), request.endDate(), request.exclArea());
-			for (Trade trade : trades) {
-				totalTrades.add(trade);
-			}
-		}
+		List<Trade> trades = tradeRepository.findFilteredTradeByComplex_IdIn(complexIds, request.startDate(), request.endDate(), request.exclArea());
 
-		return TradeResponse.from(parcelId, totalTrades);
+		return TradeResponse.from(parcelId, trades);
 	}
 
 }

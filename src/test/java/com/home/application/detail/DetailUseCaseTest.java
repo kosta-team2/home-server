@@ -208,13 +208,12 @@ class DetailUseCaseTest {
 			// given
 			Long parcelId = 1L;
 
-			// mock Trade list
-			Trade trade = mock(Trade.class);
-			List<Trade> trades = List.of(trade);
+			Trade trade1 = mock(Trade.class);
+			Trade trade2 = mock(Trade.class);
+			List<Trade> trades = List.of(trade1, trade2);
 
-			// mocking repository behavior
-			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of(100L));
-			given(tradeRepository.findByComplex_Id(100L)).willReturn(trades);
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of(100L, 101L));
+			given(tradeRepository.findByComplex_IdIn(List.of(100L, 101L))).willReturn(trades);
 
 			// when
 			TradeResponse response = detailUseCase.findAllTradeByParcelId(parcelId);
@@ -222,8 +221,9 @@ class DetailUseCaseTest {
 			// then
 			assertThat(response).isNotNull();
 			assertThat(response.trades()).isNotEmpty();
-			assertThat(response.trades().size()).isEqualTo(1);
-			then(tradeRepository).should().findByComplex_Id(100L);
+			assertThat(response.trades().size()).isEqualTo(2);
+			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
+			then(tradeRepository).should().findByComplex_IdIn(List.of(100L, 101L));
 		}
 
 		@Test
@@ -232,12 +232,11 @@ class DetailUseCaseTest {
 			// given
 			Long parcelId = 1L;
 
-			// mock repository behavior
-			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of()); // empty complexIds
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of());
 
 			// when & then
 			assertThatThrownBy(() -> detailUseCase.findAllTradeByParcelId(parcelId))
-				.isInstanceOf(IllegalArgumentException.class);  // 예외 확인
+				.isInstanceOf(IllegalArgumentException.class);  // todo 예외 확인
 
 			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
 			then(tradeRepository).shouldHaveNoInteractions();
@@ -248,9 +247,9 @@ class DetailUseCaseTest {
 		void fail_whenNoTradesExist() {
 			// given
 			Long parcelId = 1L;
-			List<Long> complexIds = List.of(100L);
+			List<Long> complexIds = List.of(100L, 101L);
 			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(complexIds);
-			given(tradeRepository.findByComplex_Id(100L)).willReturn(List.of());  // 빈 거래 목록
+			given(tradeRepository.findByComplex_IdIn(complexIds)).willReturn(List.of());
 
 			// when
 			TradeResponse response = detailUseCase.findAllTradeByParcelId(parcelId);
@@ -259,12 +258,12 @@ class DetailUseCaseTest {
 			assertThat(response).isNotNull();
 			assertThat(response.trades()).isEmpty();  // 빈 리스트 반환 확인
 			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
-			then(tradeRepository).should().findByComplex_Id(100L);
+			then(tradeRepository).should().findByComplex_IdIn(complexIds);
 		}
 	}
 
 	@Nested
-	@DisplayName("거래 데이터 조회 (findAllFilteredTradeByParcelId)")
+	@DisplayName("필터링 거래 데이터 조회 (findAllFilteredTradeByParcelId)")
 	class FindAllFilteredTradeByParcelId {
 
 		@Test
@@ -278,13 +277,13 @@ class DetailUseCaseTest {
 				120.5  // exclArea
 			);
 
-			// mock Trade list
-			Trade trade = mock(Trade.class);
-			List<Trade> trades = List.of(trade);
+			Trade trade1 = mock(Trade.class);
+			Trade trade2 = mock(Trade.class);
+			List<Trade> trades = List.of(trade1, trade2);
 
 			// mocking repository behavior
-			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of(100L));
-			given(tradeRepository.findByComplex_IdWithFilter(100L, filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea()))
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of(100L, 101L));
+			given(tradeRepository.findFilteredTradeByComplex_IdIn(List.of(100L, 101L), filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea()))
 				.willReturn(trades);
 
 			// when
@@ -293,9 +292,11 @@ class DetailUseCaseTest {
 			// then
 			assertThat(response).isNotNull();
 			assertThat(response.trades()).isNotEmpty();
-			assertThat(response.trades().size()).isEqualTo(1);
-			then(tradeRepository).should().findByComplex_IdWithFilter(100L, filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea());
+			assertThat(response.trades().size()).isEqualTo(2);
+			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
+			then(tradeRepository).should().findFilteredTradeByComplex_IdIn(List.of(100L, 101L), filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea());
 		}
+
 
 		@Test
 		@DisplayName("실패: complexIds가 비어있으면 예외를 던진다")
@@ -304,7 +305,7 @@ class DetailUseCaseTest {
 			Long parcelId = 1L;
 
 			// mock repository behavior
-			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of()); // empty complexIds
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of());
 
 			// when & then
 			assertThatThrownBy(() -> detailUseCase.findAllFilterdTradeByParcelId(parcelId, new ChartFilterRequest(
@@ -326,9 +327,9 @@ class DetailUseCaseTest {
 				120.5
 			);
 
-			List<Long> complexIds = List.of(100L);
+			List<Long> complexIds = List.of(100L, 101L);
 			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(complexIds);
-			given(tradeRepository.findByComplex_IdWithFilter(100L, filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea()))
+			given(tradeRepository.findFilteredTradeByComplex_IdIn(complexIds, filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea()))
 				.willReturn(List.of());  // 빈 거래 목록
 
 			// when
@@ -336,11 +337,11 @@ class DetailUseCaseTest {
 
 			// then
 			assertThat(response).isNotNull();
-			assertThat(response.trades()).isEmpty();  // 빈 리스트 반환 확인
+			assertThat(response.trades()).isEmpty();
 			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
-			then(tradeRepository).should().findByComplex_IdWithFilter(100L, filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea());
+			then(tradeRepository).should().findFilteredTradeByComplex_IdIn(complexIds, filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea());
 		}
-
 	}
+
 
 }
