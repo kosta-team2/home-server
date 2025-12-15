@@ -16,7 +16,10 @@ public interface ComplexRepository extends JpaRepository<Complex, Long> {
 	Optional<Complex> findByTradeName(String tradeName);
 
 	List<Complex> findAllByParcel_Id(Long parcelId);
-
+         
+	@Query("SELECT c.id FROM Complex c WHERE c.parcel.id = :parcelId")
+	List<Long> findAllIdsByParcel_Id(Long parcelId);
+  
 	@Query("""
 			SELECT new com.home.infrastructure.web.search.dto.ComplexSearchResponse(
 				c.id,
@@ -44,4 +47,5 @@ public interface ComplexRepository extends JpaRepository<Complex, Long> {
 				c.name ASC
 		""")
 	List<ComplexSearchResponse> searchComplexesWithParcel(@Param("q") String q, Pageable pageable);
+
 }

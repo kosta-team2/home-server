@@ -19,21 +19,30 @@ import com.home.domain.complex.ComplexRepository;
 import com.home.domain.parcel.Parcel;
 import com.home.domain.parcel.ParcelRepository;
 import com.home.infrastructure.web.detail.dto.DetailResponse;
+import com.home.infrastructure.web.detail.dto.TradeResponse;
+import com.home.infrastructure.web.detail.dto.ChartFilterRequest;
+import com.home.domain.trade.Trade;
+import com.home.domain.trade.TradeRepository;
 
 @MockTest
 class DetailUseCaseTest {
+
 	@Mock
 	private ComplexRepository complexRepository;
 
 	@Mock
 	private ParcelRepository parcelRepository;
 
+	@Mock
+	private TradeRepository tradeRepository;
+
 	@InjectMocks
 	private DetailUseCase detailUseCase;
 
 	@Nested
-	@DisplayName("단지 상세 조회(findByParcelId)")
+	@DisplayName("단지 상세 조회 (findByParcelId)")
 	class FindByParcelId {
+
 		@Test
 		@DisplayName("성공: Parcel과 Complex가 1개씩 존재하면 둘 다 DetailResponse로 매핑하여 반환한다")
 		void success_whenParcelAndSingleComplexExists() {
@@ -68,12 +77,12 @@ class DetailUseCaseTest {
 				.willReturn(List.of(complex));
 
 			// when
-			DetailResponse response = detailUseCase.findByParcelId(parcelId);
+			DetailResponse response = detailUseCase.findDetailByParcelId(parcelId);
 
 			// then
 			assertThat(response).isNotNull();
 			// Parcel 기반 필드
-			assertThat(response.getId()).isEqualTo(parcelId);
+			assertThat(response.getParcelId()).isEqualTo(parcelId);
 			assertThat(response.getLatitude()).isEqualTo(37.123456);
 			assertThat(response.getLongitude()).isEqualTo(127.123456);
 			assertThat(response.getAddress()).isEqualTo("서울특별시 어딘가 123");
@@ -118,13 +127,13 @@ class DetailUseCaseTest {
 				.willReturn(List.of(complex1, complex2));
 
 			// when
-			DetailResponse response = detailUseCase.findByParcelId(parcelId);
+			DetailResponse response = detailUseCase.findDetailByParcelId(parcelId);
 
 			// then
 			assertThat(response).isNotNull();
 
 			// Parcel 기반 필드만 채워져 있어야 함
-			assertThat(response.getId()).isEqualTo(parcelId);
+			assertThat(response.getParcelId()).isEqualTo(parcelId);
 			assertThat(response.getLatitude()).isEqualTo(37.123456);
 			assertThat(response.getLongitude()).isEqualTo(127.123456);
 			assertThat(response.getAddress()).isEqualTo("서울특별시 어딘가 123");
@@ -157,7 +166,7 @@ class DetailUseCaseTest {
 				.willReturn(Optional.empty());
 
 			// when & then
-			assertThatThrownBy(() -> detailUseCase.findByParcelId(parcelId))
+			assertThatThrownBy(() -> detailUseCase.findDetailByParcelId(parcelId))
 				.isInstanceOf(RuntimeException.class); // todo: 커스텀 예외로 바꾸면 여기 수정
 
 			then(parcelRepository).should().findById(parcelId);
@@ -179,7 +188,7 @@ class DetailUseCaseTest {
 				.willReturn(List.of());
 
 			// when & then
-			assertThatThrownBy(() -> detailUseCase.findByParcelId(parcelId))
+			assertThatThrownBy(() -> detailUseCase.findDetailByParcelId(parcelId))
 				.isInstanceOf(RuntimeException.class); // todo: 커스텀 예외로 바꾸면 여기 수정
 
 			then(parcelRepository).should().findById(parcelId);
@@ -188,4 +197,151 @@ class DetailUseCaseTest {
 			then(complexRepository).shouldHaveNoMoreInteractions();
 		}
 	}
+
+	@Nested
+	@DisplayName("거래 목록 조회 (findAllTradeByParcelId)")
+	class FindAllTradeByParcelId {
+
+		@Test
+		@DisplayName("성공: 거래 목록을 반환한다")
+		void success_whenTradesExist() {
+			// given
+			Long parcelId = 1L;
+
+			Trade trade1 = mock(Trade.class);
+			Trade trade2 = mock(Trade.class);
+			List<Trade> trades = List.of(trade1, trade2);
+
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of(100L, 101L));
+			given(tradeRepository.findByComplex_IdIn(List.of(100L, 101L))).willReturn(trades);
+
+			// when
+			TradeResponse response = detailUseCase.findAllTradeByParcelId(parcelId);
+
+			// then
+			assertThat(response).isNotNull();
+			assertThat(response.trades()).isNotEmpty();
+			assertThat(response.trades().size()).isEqualTo(2);
+			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
+			then(tradeRepository).should().findByComplex_IdIn(List.of(100L, 101L));
+		}
+
+		@Test
+		@DisplayName("실패: complexIds가 비어있으면 예외를 던진다")
+		void fail_whenComplexIdsEmpty() {
+			// given
+			Long parcelId = 1L;
+
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of());
+
+			// when & then
+			assertThatThrownBy(() -> detailUseCase.findAllTradeByParcelId(parcelId))
+				.isInstanceOf(IllegalArgumentException.class);  // todo 예외 확인
+
+			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
+			then(tradeRepository).shouldHaveNoInteractions();
+		}
+
+		@Test
+		@DisplayName("실패: 거래 목록이 없으면 빈 리스트 반환")
+		void fail_whenNoTradesExist() {
+			// given
+			Long parcelId = 1L;
+			List<Long> complexIds = List.of(100L, 101L);
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(complexIds);
+			given(tradeRepository.findByComplex_IdIn(complexIds)).willReturn(List.of());
+
+			// when
+			TradeResponse response = detailUseCase.findAllTradeByParcelId(parcelId);
+
+			// then
+			assertThat(response).isNotNull();
+			assertThat(response.trades()).isEmpty();  // 빈 리스트 반환 확인
+			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
+			then(tradeRepository).should().findByComplex_IdIn(complexIds);
+		}
+	}
+
+	@Nested
+	@DisplayName("필터링 거래 데이터 조회 (findAllFilteredTradeByParcelId)")
+	class FindAllFilteredTradeByParcelId {
+
+		@Test
+		@DisplayName("성공: 필터링된 거래 목록을 반환한다")
+		void success_whenFilteredTradesExist() {
+			// given
+			Long parcelId = 1L;
+			ChartFilterRequest filterRequest = new ChartFilterRequest(
+				LocalDate.of(2020, 1, 1),  // startDate
+				LocalDate.of(2025, 12, 31),  // endDate
+				120.5  // exclArea
+			);
+
+			Trade trade1 = mock(Trade.class);
+			Trade trade2 = mock(Trade.class);
+			List<Trade> trades = List.of(trade1, trade2);
+
+			// mocking repository behavior
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of(100L, 101L));
+			given(tradeRepository.findFilteredTradeByComplex_IdIn(List.of(100L, 101L), filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea()))
+				.willReturn(trades);
+
+			// when
+			TradeResponse response = detailUseCase.findAllFilterdTradeByParcelId(parcelId, filterRequest);
+
+			// then
+			assertThat(response).isNotNull();
+			assertThat(response.trades()).isNotEmpty();
+			assertThat(response.trades().size()).isEqualTo(2);
+			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
+			then(tradeRepository).should().findFilteredTradeByComplex_IdIn(List.of(100L, 101L), filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea());
+		}
+
+
+		@Test
+		@DisplayName("실패: complexIds가 비어있으면 예외를 던진다")
+		void fail_whenComplexIdsEmpty() {
+			// given
+			Long parcelId = 1L;
+
+			// mock repository behavior
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of());
+
+			// when & then
+			assertThatThrownBy(() -> detailUseCase.findAllFilterdTradeByParcelId(parcelId, new ChartFilterRequest(
+				LocalDate.of(2020, 1, 1), LocalDate.of(2025, 12, 31), 120.5)))
+				.isInstanceOf(IllegalArgumentException.class);  // 예외 확인
+
+			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
+			then(tradeRepository).shouldHaveNoInteractions();
+		}
+
+		@Test
+		@DisplayName("실패: 필터링된 거래 목록이 없으면 빈 리스트 반환")
+		void fail_whenNoFilteredTradesExist() {
+			// given
+			Long parcelId = 1L;
+			ChartFilterRequest filterRequest = new ChartFilterRequest(
+				LocalDate.of(2020, 1, 1),
+				LocalDate.of(2025, 12, 31),
+				120.5
+			);
+
+			List<Long> complexIds = List.of(100L, 101L);
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(complexIds);
+			given(tradeRepository.findFilteredTradeByComplex_IdIn(complexIds, filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea()))
+				.willReturn(List.of());  // 빈 거래 목록
+
+			// when
+			TradeResponse response = detailUseCase.findAllFilterdTradeByParcelId(parcelId, filterRequest);
+
+			// then
+			assertThat(response).isNotNull();
+			assertThat(response.trades()).isEmpty();
+			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
+			then(tradeRepository).should().findFilteredTradeByComplex_IdIn(complexIds, filterRequest.startDate(), filterRequest.endDate(), filterRequest.exclArea());
+		}
+	}
+
+
 }
