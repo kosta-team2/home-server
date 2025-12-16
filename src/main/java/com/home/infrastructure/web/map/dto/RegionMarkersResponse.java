@@ -1,8 +1,8 @@
 package com.home.infrastructure.web.map.dto;
 
-import com.home.domain.region.Region;
-
 import java.util.List;
+
+import com.home.domain.region.Region;
 
 public record RegionMarkersResponse(Long id, String name, String lat, String lng) {
 	public static List<RegionMarkersResponse> from(List<Region> regions) {

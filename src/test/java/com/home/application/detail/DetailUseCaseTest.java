@@ -18,10 +18,10 @@ import com.home.domain.complex.Complex;
 import com.home.domain.complex.ComplexRepository;
 import com.home.domain.parcel.Parcel;
 import com.home.domain.parcel.ParcelRepository;
-import com.home.infrastructure.web.detail.dto.DetailResponse;
-import com.home.infrastructure.web.detail.dto.TradeResponse;
 import com.home.domain.trade.Trade;
 import com.home.domain.trade.TradeRepository;
+import com.home.infrastructure.web.detail.dto.DetailResponse;
+import com.home.infrastructure.web.detail.dto.TradeResponse;
 
 @MockTest
 class DetailUseCaseTest {
