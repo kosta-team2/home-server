@@ -17,11 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/detail")
+@RequestMapping("/api/v1")
 public class DetailController {
 	private final DetailUseCase detailUseCase;
 
-	@GetMapping("/{parcelId}")
+	@GetMapping("/detail/{parcelId}")
 	public ResponseEntity<DetailResponse> getDetailById(@PathVariable Long parcelId) {
 		DetailResponse response = detailUseCase.findDetailByParcelId(parcelId);
 
