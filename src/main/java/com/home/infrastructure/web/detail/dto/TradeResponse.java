@@ -2,7 +2,6 @@ package com.home.infrastructure.web.detail.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.home.domain.trade.Trade;
@@ -12,7 +11,7 @@ public record TradeResponse(
 	Long parcelId,
 	List<TradeListResponse> trades
 ) {
-	public static TradeResponse from(Long parcelId, List<Trade> trades) {
+	public static TradeResponse of(Long parcelId, List<Trade> trades) {
 		if (trades == null) {
 			trades = new ArrayList<>();
 		}
@@ -24,7 +23,7 @@ public record TradeResponse(
 				trade.getDealAmount(),
 				trade.getAptDong(),
 				trade.getFloor()))
-			.collect(Collectors.toList());
+			.toList();
 
 		return new TradeResponse(parcelId, tradeList);
 	}
