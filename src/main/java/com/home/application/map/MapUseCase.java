@@ -8,6 +8,7 @@ import com.home.global.exception.external.MapApiException;
 import com.home.infrastructure.web.map.dto.MarkersRequest;
 
 import com.home.infrastructure.web.map.dto.ParcelMarkerResponse;
+import com.home.infrastructure.web.map.dto.ParcelMarkersRequest;
 import com.home.infrastructure.web.map.dto.RegionMarkersResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,21 @@ public class MapUseCase {
 				req.neLat(), req.neLng()));
 	}
 
-	public List<ParcelMarkerResponse> getComplexesByBoundary(MarkersRequest req) {
-		return parcelRepository.findParcelMarkersByBoundary(req.swLat(), req.swLng(), req.neLat(), req.neLng());
+	public List<ParcelMarkerResponse> getComplexesByBoundary(ParcelMarkersRequest req) {
+		return parcelRepository.findParcelMarkersByBoundary(
+			req.swLat(), req.swLng(), req.neLat(), req.neLng(),
+			req.unitMin(), req.unitMax(),
+			eokToWon(req.priceEokMin()), eokToWon(req.priceEokMax()),
+			req.pyeongMin(), req.pyeongMax(),
+			req.ageMin(), req.ageMax()
+		);
+	}
+
+	private Long eokToWon(Double eok) {
+		if (eok == null) return null;
+		return java.math.BigDecimal.valueOf(eok)
+			.multiply(java.math.BigDecimal.valueOf(100_000_000L))
+			.setScale(0, java.math.RoundingMode.HALF_UP)
+			.longValue();
 	}
 }

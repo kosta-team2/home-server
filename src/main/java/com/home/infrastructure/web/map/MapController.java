@@ -2,6 +2,7 @@ package com.home.infrastructure.web.map;
 
 import com.home.application.map.MapUseCase;
 import com.home.infrastructure.web.map.dto.MarkersRequest;
+import com.home.infrastructure.web.map.dto.ParcelMarkersRequest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +19,8 @@ public class MapController {
 	private final MapUseCase mapUseCase;
 
 	@PostMapping("/complexes")
-	public ResponseEntity<?> getComplexMarkers(@RequestBody MarkersRequest markersRequest) {
-		return ResponseEntity.status(HttpStatus.OK).body(mapUseCase.getComplexesByBoundary(markersRequest));
+	public ResponseEntity<?> getComplexMarkers(@RequestBody ParcelMarkersRequest req) {
+		return ResponseEntity.ok(mapUseCase.getComplexesByBoundary(req));
 	}
 
 	@PostMapping("/regions")
