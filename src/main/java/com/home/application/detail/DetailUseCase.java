@@ -11,7 +11,6 @@ import com.home.domain.parcel.Parcel;
 import com.home.domain.parcel.ParcelRepository;
 import com.home.domain.trade.Trade;
 import com.home.domain.trade.TradeRepository;
-import com.home.infrastructure.web.detail.dto.ChartFilterRequest;
 import com.home.infrastructure.web.detail.dto.DetailResponse;
 import com.home.infrastructure.web.detail.dto.TradeResponse;
 
@@ -32,7 +31,9 @@ public class DetailUseCase {
 			.orElseThrow(RuntimeException::new);	// todo 예외처리 not found
 
 		List<Complex> complexes = complexRepository.findAllByParcel_Id(parcelId);
-		if (complexes.isEmpty()) throw new RuntimeException();	// todo 예외처리 not found
+		if (complexes.isEmpty()) {
+			throw new RuntimeException();	// todo 예외처리 not found
+		}
 
 		// 1개의 parcel에 여러 complex가 존재시 complex를 제외하고 보낸다.
 		if (complexes.size() != 1) return DetailResponse.from(parcel);
@@ -42,23 +43,12 @@ public class DetailUseCase {
 	@Transactional(readOnly = true)
 	public TradeResponse findAllTradeByParcelId(Long parcelId) {
 		List<Long> complexIds = complexRepository.findAllIdsByParcel_Id(parcelId);
-		if (complexIds.isEmpty()) { throw new IllegalArgumentException(); }	//todo 예외처리
+		if (complexIds.isEmpty()) { throw new RuntimeException(); }	//todo 예외처리
 		log.info("complexIds: {}", complexIds);
 
 		List<Trade> trades = tradeRepository.findByComplex_IdIn(complexIds);
 
-		return TradeResponse.from(parcelId, trades);
-	}
-
-	@Transactional(readOnly = true)
-	public TradeResponse findAllFilterdTradeByParcelId(Long parcelId, ChartFilterRequest request) {
-		List<Long> complexIds = complexRepository.findAllIdsByParcel_Id(parcelId);
-		if (complexIds.isEmpty()) { throw new IllegalArgumentException(); }	//todo 예외처리
-		log.info("complexIds: {}", complexIds);
-
-		List<Trade> trades = tradeRepository.findFilteredTradeByComplex_IdIn(complexIds, request.startDate(), request.endDate(), request.exclArea());
-
-		return TradeResponse.from(parcelId, trades);
+		return TradeResponse.of(parcelId, trades);
 	}
 
 }

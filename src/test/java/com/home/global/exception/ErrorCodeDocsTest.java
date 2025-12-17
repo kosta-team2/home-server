@@ -1,6 +1,6 @@
 package com.home.global.exception;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
