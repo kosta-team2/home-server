@@ -15,8 +15,6 @@ import org.mockito.Mock;
 import com.home.annotations.MockTest;
 import com.home.domain.region.Region;
 import com.home.domain.region.RegionRepository;
-import com.home.global.exception.ErrorCode;
-import com.home.global.exception.external.ExternalApiException;
 import com.home.infrastructure.web.region.dto.RegionDetailResponse;
 import com.home.infrastructure.web.region.dto.RootRegionResponse;
 

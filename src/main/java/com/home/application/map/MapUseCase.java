@@ -1,5 +1,9 @@
 package com.home.application.map;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.home.domain.parcel.ParcelRepository;
 import com.home.domain.region.RegionLevel;
 import com.home.domain.region.RegionRepository;
@@ -12,10 +16,6 @@ import com.home.infrastructure.web.map.dto.RegionMarkersResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

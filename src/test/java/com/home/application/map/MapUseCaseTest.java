@@ -1,5 +1,15 @@
 package com.home.application.map;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
 import com.home.annotations.MockTest;
 import com.home.domain.parcel.ParcelRepository;
 import com.home.domain.region.Region;
@@ -10,20 +20,6 @@ import com.home.global.exception.external.MapApiException;
 import com.home.infrastructure.web.map.dto.MarkersRequest;
 import com.home.infrastructure.web.map.dto.ParcelMarkerResponse;
 import com.home.infrastructure.web.map.dto.RegionMarkersResponse;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 @MockTest
 class MapUseCaseTest {
