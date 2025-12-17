@@ -11,15 +11,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import com.home.annotations.MockTest;
-import com.home.domain.complex.Complex;
-import com.home.domain.complex.ComplexRepository;
+import com.home.domain.parcel.ParcelRepository;
 import com.home.domain.region.Region;
 import com.home.domain.region.RegionLevel;
 import com.home.domain.region.RegionRepository;
 import com.home.global.exception.ErrorCode;
 import com.home.global.exception.external.MapApiException;
-import com.home.infrastructure.web.map.dto.ComplexMarkersResponse;
 import com.home.infrastructure.web.map.dto.MarkersRequest;
+import com.home.infrastructure.web.map.dto.ParcelMarkerResponse;
 import com.home.infrastructure.web.map.dto.RegionMarkersResponse;
 
 @MockTest
@@ -29,7 +28,7 @@ class MapUseCaseTest {
 	private RegionRepository regionRepository;
 
 	@Mock
-	private ComplexRepository complexRepository;
+	private ParcelRepository parcelRepository;
 
 	@InjectMocks
 	private MapUseCase mapUseCase;
@@ -52,7 +51,6 @@ class MapUseCaseTest {
 
 		// then
 		assertThat(result).isNotNull();
-		// MarkersResponse.from(...)이 Region 리스트 크기만큼 응답을 만든다고 가정하고 사이즈만 검증
 		assertThat(result).hasSize(1);
 		verify(regionRepository).findAllRegionByLevelAndBoundary(
 			RegionLevel.SIDO, 10.0, 20.0, 30.0, 40.0
@@ -117,31 +115,32 @@ class MapUseCaseTest {
 		assertThatThrownBy(() -> mapUseCase.getAllRegionsByLevelAndBoundary(req))
 			.isInstanceOf(MapApiException.class)
 			.satisfies(ex -> {
-				MapApiException e = (MapApiException)ex;
+				MapApiException e = (MapApiException) ex;
 				assertThat(e.getErrorCode()).isEqualTo(ErrorCode.INVALID_PARAMETER);
 			});
 	}
 
 	@Test
-	@DisplayName("경계값으로 단지(Complex)를 조회한다")
+	@DisplayName("경계값으로 Parcel 마커(집계 결과)를 조회한다")
 	void getComplexesByBoundary_success() {
-		// given
-		MarkersRequest req = new MarkersRequest(10.0, 20.0, 30.0, 40.0, "complex"); // region 값은 사용되지 않음
-		Complex complex = mock(Complex.class);
+		MarkersRequest req = new MarkersRequest(10.0, 20.0, 30.0, 40.0, "complex"); // region은 여기서 의미 없음
 
-		given(complexRepository.findAllByBoundary(
+		List<ParcelMarkerResponse> expected = List.of(
+			new ParcelMarkerResponse(1L, 37.5, 127.0, 1785000000L, 1234L)
+		);
+
+		given(parcelRepository.findParcelMarkersByBoundary(
 			eq(10.0), eq(20.0),
 			eq(30.0), eq(40.0)
-		)).willReturn(List.of(complex));
+		)).willReturn(expected);
 
 		// when
-		List<ComplexMarkersResponse> result = mapUseCase.getComplexesByBoundary(req);
+		List<ParcelMarkerResponse> result = mapUseCase.getComplexesByBoundary(req);
 
 		// then
 		assertThat(result).isNotNull();
-		// ComplexMarkersResponse.from(...)이 Complex 리스트 크기만큼 응답을 만든다고 가정
-		assertThat(result).hasSize(1);
-		verify(complexRepository).findAllByBoundary(10.0, 20.0, 30.0, 40.0);
+		assertThat(result).isEqualTo(expected);
+
+		verify(parcelRepository).findParcelMarkersByBoundary(10.0, 20.0, 30.0, 40.0);
 	}
 }
-
