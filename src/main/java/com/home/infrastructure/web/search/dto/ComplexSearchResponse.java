@@ -7,4 +7,5 @@ public record ComplexSearchResponse(
 	Double latitude,
 	Double longitude,
 	String address
-) {}
+) {
+}

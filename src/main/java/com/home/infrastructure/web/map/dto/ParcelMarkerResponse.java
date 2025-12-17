@@ -6,4 +6,5 @@ public record ParcelMarkerResponse(
 	Double longitude,
 	Long latestDealAmount,
 	Long unitCntSum
-) {}
+) {
+}
