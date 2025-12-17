@@ -8,4 +8,5 @@ public record ParcelMarkersRequest(
 	Double priceEokMin, Double priceEokMax,
 	Integer ageMin, Integer ageMax,
 	Long unitMin, Long unitMax
-) {}
+) {
+}
