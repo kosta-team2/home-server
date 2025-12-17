@@ -26,19 +26,24 @@ public class MapUseCase {
 	private final ParcelRepository parcelRepository;
 
 	public List<RegionMarkersResponse> getAllRegionsByLevelAndBoundary(MarkersRequest req) {
-		RegionLevel regionLevel;
-		if ("si-do".equals(req.region())) {
-			regionLevel = RegionLevel.SIDO;
-		} else if ("si-gun-gu".equals(req.region())) {
-			regionLevel = RegionLevel.SIGUNGU;
-		} else if ("eup-myeon-dong".equals(req.region())) {
-			regionLevel = RegionLevel.EUP_MYEON_DONG;
-		} else {
-			throw new MapApiException(ErrorCode.INVALID_PARAMETER);
-		}
-		return RegionMarkersResponse.from(
-			regionRepository.findAllRegionByLevelAndBoundary(regionLevel, req.swLat(), req.swLng(),
-				req.neLat(), req.neLng()));
+		RegionLevel level = switch (req.region()) {
+			case "si-do" -> RegionLevel.SIDO;
+			case "si-gun-gu" -> RegionLevel.SIGUNGU;
+			case "eup-myeon-dong" -> RegionLevel.EUP_MYEON_DONG;
+			default -> throw new MapApiException(ErrorCode.INVALID_PARAMETER);
+		};
+
+		return switch (level) {
+			case SIDO -> regionRepository.findSidoMarkersWithUnitSumByBoundary(
+				req.swLat(), req.swLng(), req.neLat(), req.neLng()
+			);
+			case SIGUNGU -> regionRepository.findSigunguMarkersWithUnitSumByBoundary(
+				req.swLat(), req.swLng(), req.neLat(), req.neLng()
+			);
+			case EUP_MYEON_DONG -> regionRepository.findEmdMarkersWithUnitSumByBoundary(
+				req.swLat(), req.swLng(), req.neLat(), req.neLng()
+			);
+		};
 	}
 
 	public List<ParcelMarkerResponse> getComplexesByBoundary(ParcelMarkersRequest req) {
