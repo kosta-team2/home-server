@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.home.application.detail.DetailUseCase;
 import com.home.infrastructure.web.detail.dto.DetailResponse;
+import com.home.infrastructure.web.detail.dto.TradeResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
