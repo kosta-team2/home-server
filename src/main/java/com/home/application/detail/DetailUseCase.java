@@ -32,14 +32,12 @@ public class DetailUseCase {
 		Parcel parcel = parcelRepository.findById(parcelId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND, "일치하는 parcel 정보가 없습니다. parcelId: " + parcelId));
 
-		List<Complex> complexes = complexRepository.findAllByParcel_Id(parcelId);
-		if (complexes.isEmpty()) {
+		Complex complex = complexRepository.findTopByParcel_IdOrderByUseDateAsc(parcelId);
+		if (complex == null) {
 			throw new NotFoundException(ErrorCode.DATA_NOT_FOUND, "일치하는 complex 정보가 없습니다. parcelId: " + parcelId);
 		}
 
-		// 1개의 parcel에 여러 complex가 존재시 complex를 제외하고 보낸다.
-		if (complexes.size() != 1) return DetailResponse.from(parcel);
-		return DetailResponse.of(parcel, complexes.get(0));
+		return DetailResponse.of(parcel, complex);
 	}
 
 	@Transactional(readOnly = true)
