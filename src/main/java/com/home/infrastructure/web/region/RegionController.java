@@ -21,9 +21,9 @@ import lombok.RequiredArgsConstructor;
 public class RegionController {
 	private final RegionUseCase regionUseCase;
 
-	@GetMapping("/{id}")
-	public ResponseEntity<RegionDetailResponse> getRegionsById(@PathVariable Long id) {
-		RegionDetailResponse response = regionUseCase.getRegionInfoWithChildren(id);
+	@GetMapping("/{regionId}")
+	public ResponseEntity<RegionDetailResponse> getRegionsById(@PathVariable Long regionId) {
+		RegionDetailResponse response = regionUseCase.getRegionInfoWithChildren(regionId);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
