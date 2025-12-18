@@ -170,6 +170,7 @@ public class Complex extends BaseEntity {
 			return;
 		}
 
+		//TODO: 에러처리 개선
 		//위 조건을 통과하지 못하면 에러로 판단.
 		// throw new IllegalStateException(
 		// 	"aptSeq 값이 이미 존재합니다. 기존=" + this.aptSeq + ", 새=" + newSeq
