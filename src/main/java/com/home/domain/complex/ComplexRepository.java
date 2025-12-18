@@ -13,7 +13,7 @@ import com.home.infrastructure.web.search.dto.ComplexSearchResponse;
 public interface ComplexRepository extends JpaRepository<Complex, Long> {
 	Optional<Complex> findByAptSeq(String aptSeq);
 
-	Optional<Complex> findByTradeName(String tradeName);
+	List<Complex> findByTradeName(String tradeName);
 
 	List<Complex> findAllByParcel_Id(Long parcelId);
 

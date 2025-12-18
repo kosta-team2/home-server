@@ -46,3 +46,6 @@ out/
 
 ### PostGIS ###
 AL_D010_11_20251204
+
+### data ###
+src/main/resources/data

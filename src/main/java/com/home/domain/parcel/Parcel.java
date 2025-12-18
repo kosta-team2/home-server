@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 	name = "parcel_seq",
 	sequenceName = "parcel_id_seq",
 	initialValue = 1,
-	allocationSize = 50
+	allocationSize = 100
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Parcel extends BaseEntity {
