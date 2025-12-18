@@ -18,6 +18,7 @@ public record TradeResponse(
 
 		List<TradeListResponse> tradeList = trades.stream()
 			.map(trade -> new TradeListResponse(
+				trade.getId(),
 				trade.getDealDate(),
 				trade.getExclArea(),
 				trade.getDealAmount(),
