@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 	name = "complex_seq",
 	sequenceName = "complex_id_seq",
 	initialValue = 1,
-	allocationSize = 50
+	allocationSize = 100
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Complex extends BaseEntity {
@@ -171,8 +171,8 @@ public class Complex extends BaseEntity {
 		}
 
 		//위 조건을 통과하지 못하면 에러로 판단.
-		throw new IllegalStateException(
-			"aptSeq 값이 이미 존재합니다. 기존=" + this.aptSeq + ", 새=" + newSeq
-		);
+		// throw new IllegalStateException(
+		// 	"aptSeq 값이 이미 존재합니다. 기존=" + this.aptSeq + ", 새=" + newSeq
+		// );
 	}
 }

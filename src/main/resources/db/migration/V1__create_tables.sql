@@ -1,12 +1,12 @@
 CREATE
-SEQUENCE IF NOT EXISTS region_id_seq
+    SEQUENCE IF NOT EXISTS region_id_seq
     START
-WITH 1
+        WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE
-1;
+        1;
 
 CREATE TABLE IF NOT EXISTS region
 (
@@ -31,27 +31,27 @@ CREATE TABLE IF NOT EXISTS raw.parcel_raw
 );
 
 CREATE
-SEQUENCE IF NOT EXISTS parcel_id_seq
+    SEQUENCE IF NOT EXISTS parcel_id_seq
     START
-WITH 1
-    INCREMENT BY 50
+        WITH 1
+    INCREMENT BY 100
     NO MINVALUE
     NO MAXVALUE
     CACHE
-50;
+        100;
 
 CREATE TABLE IF NOT EXISTS parcel
 (
-    id         BIGINT PRIMARY KEY DEFAULT nextval('parcel_id_seq'),
+    id         BIGINT PRIMARY KEY                   DEFAULT nextval('parcel_id_seq'),
 
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
     deleted_at TIMESTAMP WITHOUT TIME ZONE,
 
-    pnu        VARCHAR(19) NOT NULL,
+    pnu        VARCHAR(19)                 NOT NULL,
     longitude  DOUBLE PRECISION,
     latitude   DOUBLE PRECISION,
-    address    TEXT        NOT NULL,
+    address    TEXT                        NOT NULL,
 
     region_id  BIGINT REFERENCES region (id),
 
@@ -59,28 +59,28 @@ CREATE TABLE IF NOT EXISTS parcel
 );
 
 CREATE
-SEQUENCE IF NOT EXISTS complex_id_seq
+    SEQUENCE IF NOT EXISTS complex_id_seq
     START
-WITH 1
-    INCREMENT BY 50
+        WITH 1
+    INCREMENT BY 100
     NO MINVALUE
     NO MAXVALUE
     CACHE
-50;
+        100;
 
 CREATE TABLE IF NOT EXISTS complex
 (
-    id         BIGINT PRIMARY KEY DEFAULT nextval('complex_id_seq'),
+    id         BIGINT PRIMARY KEY                   DEFAULT nextval('complex_id_seq'),
 
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
     deleted_at TIMESTAMP WITHOUT TIME ZONE,
 
     apt_seq    VARCHAR(255),
-    complex_pk VARCHAR(255) NOT NULL,
+    complex_pk VARCHAR(255)                NOT NULL,
     pnu        VARCHAR(19),
-    trade_name TEXT         NOT NULL,
-    name       TEXT         NOT NULL,
+    trade_name TEXT                        NOT NULL,
+    name       TEXT                        NOT NULL,
     dong_cnt   INTEGER,
     unit_cnt   INTEGER,
     plat_area  DOUBLE PRECISION,
@@ -97,28 +97,28 @@ CREATE TABLE IF NOT EXISTS complex
 );
 
 CREATE
-SEQUENCE IF NOT EXISTS trade_id_seq
+    SEQUENCE IF NOT EXISTS trade_id_seq
     START
-WITH 1
-    INCREMENT BY 50
+        WITH 1
+    INCREMENT BY 100
     NO MINVALUE
     NO MAXVALUE
     CACHE
-50;
+        100;
 
 CREATE TABLE IF NOT EXISTS trade
 (
-    id          BIGINT PRIMARY KEY DEFAULT nextval('trade_id_seq'),
+    id          BIGINT PRIMARY KEY                   DEFAULT nextval('trade_id_seq'),
 
     created_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
     updated_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP WITHOUT TIME ZONE,
 
     apt_dong    TEXT,
-    deal_amount BIGINT NOT NULL,
-    deal_date   DATE   NOT NULL,
+    deal_amount BIGINT                      NOT NULL,
+    deal_date   DATE                        NOT NULL,
     floor       INTEGER,
     excl_area   DOUBLE PRECISION,
 
-    complex_id  BIGINT NOT NULL REFERENCES complex (id)
+    complex_id  BIGINT                      NOT NULL REFERENCES complex (id)
 );

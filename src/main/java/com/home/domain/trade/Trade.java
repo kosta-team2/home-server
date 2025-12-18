@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 	name = "trade_seq",
 	sequenceName = "trade_id_seq",
 	initialValue = 1,
-	allocationSize = 50
+	allocationSize = 100
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Trade extends BaseEntity {
