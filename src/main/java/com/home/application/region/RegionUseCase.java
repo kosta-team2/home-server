@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.home.domain.region.Region;
 import com.home.domain.region.RegionRepository;
+import com.home.global.exception.ErrorCode;
+import com.home.global.exception.common.NotFoundException;
 import com.home.infrastructure.web.region.dto.RegionDetailResponse;
 import com.home.infrastructure.web.region.dto.RootRegionResponse;
 
@@ -22,7 +24,7 @@ public class RegionUseCase {
 	@Transactional(readOnly = true)
 	public RegionDetailResponse getRegionInfoWithChildren(Long id) {
 		Region region = regionRepository.findById(id)
-			.orElseThrow(RuntimeException::new); // todo 예외처리
+			.orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND, "일치하는 region 정보가 없습니다. regionId: " + id));
 
 		List<Region> children = regionRepository.findAllByParent_Id(id);
 

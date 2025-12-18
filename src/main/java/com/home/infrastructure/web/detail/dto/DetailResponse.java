@@ -5,11 +5,15 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.home.domain.complex.Complex;
 import com.home.domain.parcel.Parcel;
+import com.home.global.exception.ErrorCode;
+import com.home.global.exception.common.InvalidParameterException;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 @Builder
 @AllArgsConstructor
@@ -33,7 +37,8 @@ public class DetailResponse {
 
 	public static DetailResponse from(Parcel parcel) {
 		if (parcel == null) {
-			return null;	// todo 예외처리 Illegal
+			throw new InvalidParameterException(ErrorCode.INVALID_PARAMETER);
+			// log.warn();
 		}
 		return DetailResponse.builder()
 			.parcelId(parcel.getId())

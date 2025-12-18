@@ -23,6 +23,7 @@ public enum ErrorCode {
 	INVALID_INPUT(HttpStatus.BAD_REQUEST, "C400", "잘못된 요청 형식 입니다."),
 	INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "C401", "잘못된 파라미터 형식 입니다."),
 	EXTERNAL_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "I404", "외부 데이터에서 결과를 찾을 수 없습니다."),
+	DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "C404", "일치하는 데이터가 없습니다."),
 
 	INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S500", "서버 오류가 발생했습니다."),
 	EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "I500", "외부 서비스 연동 중 오류가 발생했습니다.");

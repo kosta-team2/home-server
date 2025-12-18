@@ -20,6 +20,7 @@ import com.home.domain.parcel.Parcel;
 import com.home.domain.parcel.ParcelRepository;
 import com.home.domain.trade.Trade;
 import com.home.domain.trade.TradeRepository;
+import com.home.global.exception.common.NotFoundException;
 import com.home.infrastructure.web.detail.dto.DetailResponse;
 import com.home.infrastructure.web.detail.dto.TradeResponse;
 
@@ -48,7 +49,6 @@ class DetailUseCaseTest {
 			// given
 			Long parcelId = 1L;
 
-			// Parcel mock
 			Parcel parcel = mock(Parcel.class);
 			given(parcel.getId()).willReturn(parcelId);
 			given(parcel.getLatitude()).willReturn(37.123456);
@@ -58,7 +58,6 @@ class DetailUseCaseTest {
 			given(parcelRepository.findById(parcelId))
 				.willReturn(Optional.of(parcel));
 
-			// Complex mock (1개만 존재하는 상황)
 			Complex complex = mock(Complex.class);
 			given(complex.getTradeName()).willReturn("힐스테이트");
 			given(complex.getName()).willReturn("힐스테이트 아파트");
@@ -80,13 +79,11 @@ class DetailUseCaseTest {
 
 			// then
 			assertThat(response).isNotNull();
-			// Parcel 기반 필드
 			assertThat(response.getParcelId()).isEqualTo(parcelId);
 			assertThat(response.getLatitude()).isEqualTo(37.123456);
 			assertThat(response.getLongitude()).isEqualTo(127.123456);
 			assertThat(response.getAddress()).isEqualTo("서울특별시 어딘가 123");
 
-			// Complex 기반 필드
 			assertThat(response.getTradeName()).isEqualTo("힐스테이트");
 			assertThat(response.getName()).isEqualTo("힐스테이트 아파트");
 			assertThat(response.getDongCnt()).isEqualTo(5);
@@ -102,6 +99,7 @@ class DetailUseCaseTest {
 			then(complexRepository).should().findAllByParcel_Id(parcelId);
 			then(parcelRepository).shouldHaveNoMoreInteractions();
 			then(complexRepository).shouldHaveNoMoreInteractions();
+			then(tradeRepository).shouldHaveNoInteractions();
 		}
 
 		@Test
@@ -119,7 +117,6 @@ class DetailUseCaseTest {
 			given(parcelRepository.findById(parcelId))
 				.willReturn(Optional.of(parcel));
 
-			// Complex가 2개 이상인 상황
 			Complex complex1 = mock(Complex.class);
 			Complex complex2 = mock(Complex.class);
 			given(complexRepository.findAllByParcel_Id(parcelId))
@@ -130,14 +127,11 @@ class DetailUseCaseTest {
 
 			// then
 			assertThat(response).isNotNull();
-
-			// Parcel 기반 필드만 채워져 있어야 함
 			assertThat(response.getParcelId()).isEqualTo(parcelId);
 			assertThat(response.getLatitude()).isEqualTo(37.123456);
 			assertThat(response.getLongitude()).isEqualTo(127.123456);
 			assertThat(response.getAddress()).isEqualTo("서울특별시 어딘가 123");
 
-			// Complex 기반 필드는 null (from(parcel) 사용)
 			assertThat(response.getTradeName()).isNull();
 			assertThat(response.getName()).isNull();
 			assertThat(response.getDongCnt()).isNull();
@@ -153,10 +147,11 @@ class DetailUseCaseTest {
 			then(complexRepository).should().findAllByParcel_Id(parcelId);
 			then(parcelRepository).shouldHaveNoMoreInteractions();
 			then(complexRepository).shouldHaveNoMoreInteractions();
+			then(tradeRepository).shouldHaveNoInteractions();
 		}
 
 		@Test
-		@DisplayName("실패: Parcel이 존재하지 않으면 RuntimeException을 던진다")
+		@DisplayName("실패: Parcel이 존재하지 않으면 NotFoundException을 던진다")
 		void fail_whenParcelNotFound() {
 			// given
 			Long parcelId = 999L;
@@ -166,15 +161,16 @@ class DetailUseCaseTest {
 
 			// when & then
 			assertThatThrownBy(() -> detailUseCase.findDetailByParcelId(parcelId))
-				.isInstanceOf(RuntimeException.class); // todo: 커스텀 예외로 바꾸면 여기 수정
+				.isInstanceOf(NotFoundException.class);
 
 			then(parcelRepository).should().findById(parcelId);
 			then(complexRepository).shouldHaveNoInteractions();
+			then(tradeRepository).shouldHaveNoInteractions();
 			then(parcelRepository).shouldHaveNoMoreInteractions();
 		}
 
 		@Test
-		@DisplayName("실패: Complex 목록이 비어 있으면 RuntimeException을 던진다")
+		@DisplayName("실패: Complex 목록이 비어 있으면 NotFoundException을 던진다")
 		void fail_whenComplexListEmpty() {
 			// given
 			Long parcelId = 1L;
@@ -188,11 +184,87 @@ class DetailUseCaseTest {
 
 			// when & then
 			assertThatThrownBy(() -> detailUseCase.findDetailByParcelId(parcelId))
-				.isInstanceOf(RuntimeException.class); // todo: 커스텀 예외로 바꾸면 여기 수정
+				.isInstanceOf(NotFoundException.class);
 
 			then(parcelRepository).should().findById(parcelId);
 			then(complexRepository).should().findAllByParcel_Id(parcelId);
 			then(parcelRepository).shouldHaveNoMoreInteractions();
+			then(complexRepository).shouldHaveNoMoreInteractions();
+			then(tradeRepository).shouldHaveNoInteractions();
+		}
+	}
+
+	@Nested
+	@DisplayName("거래 전체 조회 (findAllTradeByParcelId)")
+	class FindAllTradeByParcelId {
+
+		@Test
+		@DisplayName("성공: parcelId로 complexIds를 조회하고, 해당 complexIds로 trades를 조회하여 TradeResponse로 반환한다")
+		void success_whenComplexIdsExist_returnsTradeResponse() {
+			// given
+			Long parcelId = 1L;
+			List<Long> complexIds = List.of(100L, 101L);
+
+			Trade trade1 = mock(Trade.class);
+			Trade trade2 = mock(Trade.class);
+			List<Trade> trades = List.of(trade1, trade2);
+
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(complexIds);
+			given(tradeRepository.findByComplex_IdIn(complexIds)).willReturn(trades);
+
+			// when
+			TradeResponse response = detailUseCase.findAllTradeByParcelId(parcelId);
+
+			// then
+			assertThat(response).isNotNull();
+			// TradeResponse 내부 구조를 몰라도 최소한 null 아님 + 호출 검증은 가능
+			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
+			then(tradeRepository).should().findByComplex_IdIn(complexIds);
+
+			then(parcelRepository).shouldHaveNoInteractions();
+			then(complexRepository).shouldHaveNoMoreInteractions();
+			then(tradeRepository).shouldHaveNoMoreInteractions();
+		}
+
+		@Test
+		@DisplayName("성공: trades가 비어 있어도 TradeResponse를 반환한다 (서비스는 예외를 던지지 않음)")
+		void success_whenTradesEmpty_returnsTradeResponse() {
+			// given
+			Long parcelId = 1L;
+			List<Long> complexIds = List.of(100L, 101L);
+
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(complexIds);
+			given(tradeRepository.findByComplex_IdIn(complexIds)).willReturn(List.of());
+
+			// when
+			TradeResponse response = detailUseCase.findAllTradeByParcelId(parcelId);
+
+			// then
+			assertThat(response).isNotNull();
+
+			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
+			then(tradeRepository).should().findByComplex_IdIn(complexIds);
+
+			then(parcelRepository).shouldHaveNoInteractions();
+			then(complexRepository).shouldHaveNoMoreInteractions();
+			then(tradeRepository).shouldHaveNoMoreInteractions();
+		}
+
+		@Test
+		@DisplayName("실패: complexIds가 비어 있으면 NotFoundException을 던진다")
+		void fail_whenComplexIdsEmpty_throwsNotFoundException() {
+			// given
+			Long parcelId = 1L;
+
+			given(complexRepository.findAllIdsByParcel_Id(parcelId)).willReturn(List.of());
+
+			// when & then
+			assertThatThrownBy(() -> detailUseCase.findAllTradeByParcelId(parcelId))
+				.isInstanceOf(NotFoundException.class);
+
+			then(complexRepository).should().findAllIdsByParcel_Id(parcelId);
+			then(tradeRepository).shouldHaveNoInteractions();
+			then(parcelRepository).shouldHaveNoInteractions();
 			then(complexRepository).shouldHaveNoMoreInteractions();
 		}
 	}

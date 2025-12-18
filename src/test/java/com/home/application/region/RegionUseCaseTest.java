@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import com.home.annotations.MockTest;
 import com.home.domain.region.Region;
 import com.home.domain.region.RegionRepository;
+import com.home.global.exception.common.NotFoundException;
 import com.home.infrastructure.web.region.dto.RegionDetailResponse;
 import com.home.infrastructure.web.region.dto.RootRegionResponse;
 
@@ -95,7 +96,7 @@ class RegionUseCaseTest {
 
 			// when & then
 			assertThatThrownBy(() -> regionUseCase.getRegionInfoWithChildren(regionId))
-				.isInstanceOf(RuntimeException.class);	//todo 에러 검증
+				.isInstanceOf(NotFoundException.class);
 
 			then(regionRepository).should().findById(regionId);
 			then(regionRepository).should(never()).findAllByParent_Id(anyLong());
