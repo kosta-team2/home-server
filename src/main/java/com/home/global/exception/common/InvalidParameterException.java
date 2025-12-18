@@ -4,11 +4,11 @@ import com.home.global.exception.BusinessException;
 import com.home.global.exception.ErrorCode;
 
 public class InvalidParameterException extends BusinessException {
-	protected InvalidParameterException(ErrorCode errorCode) {
+	public InvalidParameterException(ErrorCode errorCode) {
 		super(errorCode);
 	}
 
-	protected InvalidParameterException(ErrorCode errorCode, String message) {
+	public InvalidParameterException(ErrorCode errorCode, String message) {
 		super(errorCode, message);
 	}
 
