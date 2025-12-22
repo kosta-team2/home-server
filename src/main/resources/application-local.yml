@@ -1,4 +1,7 @@
 spring:
+  batch:
+    jdbc:
+      initialize-schema: always
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:5432/home?reWriteBatchedInserts=true
     username: home_user
