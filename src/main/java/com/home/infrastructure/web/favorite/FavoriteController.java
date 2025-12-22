@@ -7,13 +7,16 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.home.application.favorite.FavoriteUseCase;
+import com.home.global.exception.common.UnauthorizedException;
 import com.home.infrastructure.security.oauth.UserDetailPrincipal;
 import com.home.infrastructure.web.favorite.dto.FavoriteAlarmRequest;
 import com.home.infrastructure.web.favorite.dto.FavoriteCreateRequest;
 import com.home.infrastructure.web.favorite.dto.FavoriteResponse;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/favorites")
 @RequiredArgsConstructor
@@ -23,7 +26,7 @@ public class FavoriteController {
 
 	private Long userId(UserDetailPrincipal principal) {
 		if (principal == null) {
-			throw new IllegalArgumentException("unauthorized");
+			throw new UnauthorizedException("unauthorized");
 		}
 		return principal.getUserId();
 	}

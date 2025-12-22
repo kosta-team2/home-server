@@ -12,6 +12,4 @@ public interface FavoriteParcelRepository extends JpaRepository<FavoriteParcel, 
 	Optional<FavoriteParcel> findByUser_IdAndParcel_Id(Long userId, Long parcelId);
 
 	boolean existsByUser_IdAndParcel_Id(Long userId, Long parcelId);
-
-	void deleteByUser_IdAndParcel_Id(Long userId, Long parcelId);
 }

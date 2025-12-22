@@ -10,7 +10,10 @@ import com.home.domain.favorite.FavoriteParcelRepository;
 import com.home.domain.parcel.Parcel;
 import com.home.domain.parcel.ParcelRepository;
 import com.home.domain.user.User;
-import com.home.domain.user.UserRepository; // 없으면 추가해야 함
+import com.home.domain.user.UserRepository;
+import com.home.global.exception.ErrorCode;
+import com.home.global.exception.common.NotFoundException;
+import com.home.global.exception.common.UnauthorizedException;
 import com.home.infrastructure.web.favorite.dto.FavoriteResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -29,10 +32,10 @@ public class FavoriteUseCase {
 			.map(FavoriteResponse::from)
 			.orElseGet(() -> {
 				User user = userRepository.findById(userId)
-					.orElseThrow(() -> new IllegalArgumentException("user not found"));
+					.orElseThrow(() -> new UnauthorizedException("user not found"));
 
 				Parcel parcel = parcelRepository.findById(parcelId)
-					.orElseThrow(() -> new IllegalArgumentException("parcel not found"));
+					.orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND, "parcel not found"));
 
 				String name = (complexName == null || complexName.isBlank()) ? "관심 단지" : complexName.trim();
 
@@ -52,10 +55,10 @@ public class FavoriteUseCase {
 	@Transactional
 	public FavoriteResponse updateAlarm(Long userId, Long favoriteId, boolean enabled) {
 		FavoriteParcel f = favoriteParcelRepository.findById(favoriteId)
-			.orElseThrow(() -> new IllegalArgumentException("favorite not found"));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND, "favorite not found"));
 
 		if (!f.getUser().getId().equals(userId)) {
-			throw new IllegalArgumentException("forbidden");
+			throw new UnauthorizedException("forbidden");
 		}
 
 		f.setAlarmEnabled(enabled);
@@ -65,10 +68,10 @@ public class FavoriteUseCase {
 	@Transactional
 	public void remove(Long userId, Long favoriteId) {
 		FavoriteParcel f = favoriteParcelRepository.findById(favoriteId)
-			.orElseThrow(() -> new IllegalArgumentException("favorite not found"));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND, "favorite not found"));
 
 		if (!f.getUser().getId().equals(userId)) {
-			throw new IllegalArgumentException("forbidden");
+			throw new UnauthorizedException("forbidden");
 		}
 
 		favoriteParcelRepository.delete(f);
