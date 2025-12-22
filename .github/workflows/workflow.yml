@@ -23,12 +23,13 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Gradle
-        run: ./gradlew clean build \
-          -x test \
-          -x checkstyleMain \
-          -x checkstyleTest \
-          -x jacocoTestReport \
-          -x jacocoTestCoverageVerification
+        run: |
+          ./gradlew clean build \
+            -x test \
+            -x checkstyleMain \
+            -x checkstyleTest \
+            -x jacocoTestReport \
+            -x jacocoTestCoverageVerification
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
