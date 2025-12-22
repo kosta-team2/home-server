@@ -67,11 +67,8 @@ public class SecurityConfig {
 	CorsConfigurationSource corsConfiguration() {
 		CorsConfiguration config = new CorsConfiguration();
 
-		config.setAllowedOrigins(List.of(
-			"http://localhost:5173",
-			"https://www.homesearch.world",
-			"https://homesearch.world"
-		));
+		config.setAllowedOrigins(
+			List.of("http://localhost:5173"));
 
 		config.addAllowedHeader(
 			"*"); // corsConfiguration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));

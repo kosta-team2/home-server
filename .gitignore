@@ -49,11 +49,3 @@ AL_D010_11_20251204
 
 ### data ###
 src/main/resources/data
-
-### teraform ###
-.terraform/
-terraform
-*.tfstate
-*.tfstate.*
-.terraform.lock.hcl
-terraform/terraform.tfvars

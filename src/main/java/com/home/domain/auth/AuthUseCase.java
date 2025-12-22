@@ -1,4 +1,4 @@
-package com.home.application.auth;
+package com.home.domain.auth;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
