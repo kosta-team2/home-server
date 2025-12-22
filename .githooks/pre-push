@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# 실행 방법 (한 번만):
+# chmod +x .githooks/pre-push
+# git config core.hooksPath .githooks
+
+set -o nounset
+set -o pipefail
+
+# 항상 리포지토리 루트에서 실행
+cd "$(git rev-parse --show-toplevel)"
+
+echo "[pre-push] Running local quality gate: ./gradlew --no-daemon verify"
+
+# gradlew 실행 결과에 따라 성공/실패 분기
+if ./gradlew --no-daemon verify; then
+  echo "[pre-push] ✅ 성공"
+  exit 0
+else
+  echo "[pre-push] ❌ 실패"
+  echo "  → 직접 ./gradlew --no-daemon verify 실행해서 에러 먼저 고치세요."
+  exit 1
+fi
+
+

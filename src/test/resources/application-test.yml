@@ -1,0 +1,45 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+    open-in-view: false
+
+logging:
+  level:
+    root: warn
+
+
+apis:
+  data:
+    base-url: http://localhost
+    apt-service-key: DUMMY
+    apt-title-path: /dummy
+    bld-service-key: DUMMY
+    bld-title-path: /dummy
+
+odcloud:
+  data:
+    base-url: http://localhost
+    od-service-key: DUMMY
+    apt-title-path: /dummy
+    dong-title-path: /dummy
+
+vworld:
+  data:
+    base-url: http://localhost
+    vw-service-key: DUMMY
+    vm-domain: /dummy
+    vm-wfs-path: /dummy
+    vm-data-path: /dummy
