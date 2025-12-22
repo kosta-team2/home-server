@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.home.domain.user.User;
 import com.home.domain.user.UserRepository;
+import com.home.global.exception.ErrorCode;
+import com.home.global.exception.common.NotFoundException;
 import com.home.infrastructure.security.oauth.UserDetailPrincipal;
 import com.home.infrastructure.web.user.dto.MeMiniResponse;
 
@@ -32,7 +34,7 @@ public class UserController {
 		Long uid = userId(principal);
 
 		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new IllegalArgumentException("user not found"));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND, "user not found"));
 
 		return ResponseEntity.ok(MeMiniResponse.from(user));
 	}

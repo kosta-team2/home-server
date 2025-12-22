@@ -12,8 +12,8 @@ import com.home.domain.parcel.ParcelRepository;
 import com.home.domain.user.User;
 import com.home.domain.user.UserRepository;
 import com.home.global.exception.ErrorCode;
+import com.home.global.exception.common.ForbiddenException;
 import com.home.global.exception.common.NotFoundException;
-import com.home.global.exception.common.UnauthorizedException;
 import com.home.infrastructure.web.favorite.dto.FavoriteResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class FavoriteUseCase {
 			.map(FavoriteResponse::from)
 			.orElseGet(() -> {
 				User user = userRepository.findById(userId)
-					.orElseThrow(() -> new UnauthorizedException("user not found"));
+					.orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND, "user not found"));
 
 				Parcel parcel = parcelRepository.findById(parcelId)
 					.orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND, "parcel not found"));
@@ -58,7 +58,7 @@ public class FavoriteUseCase {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND, "favorite not found"));
 
 		if (!f.getUser().getId().equals(userId)) {
-			throw new UnauthorizedException("forbidden");
+			throw new ForbiddenException(ErrorCode.AUTH_ERROR, "forbidden");
 		}
 
 		f.setAlarmEnabled(enabled);
@@ -71,7 +71,7 @@ public class FavoriteUseCase {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND, "favorite not found"));
 
 		if (!f.getUser().getId().equals(userId)) {
-			throw new UnauthorizedException("forbidden");
+			throw new ForbiddenException(ErrorCode.AUTH_ERROR, "forbidden");
 		}
 
 		favoriteParcelRepository.delete(f);
