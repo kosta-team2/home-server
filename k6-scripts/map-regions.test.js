@@ -13,7 +13,7 @@ import {check, sleep} from 'k6';
  *  10명이 1분 동안 최대한 자연스럽게 지도 API를 두드리는 시뮬레이션
  */
 export const options = {
-    vus: 10,
+    vus: 100,
     duration: '1m',
     thresholds: {
         http_req_duration: ['p(95)<500'],
