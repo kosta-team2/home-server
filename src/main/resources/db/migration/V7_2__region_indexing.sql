@@ -33,5 +33,5 @@ CREATE TRIGGER trg_region_set_geom
     EXECUTE FUNCTION region_set_geom();
 
 -- 인덱싱
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_region_geom
+CREATE INDEX IF NOT EXISTS idx_region_geom
     ON region USING GIST (geom);
