@@ -6,7 +6,8 @@ CREATE INDEX IF NOT EXISTS idx_region_sgg_emd
     ON region (sgg_code, emd_code);
 
 -- region PostGis
-ALTER TABLE region ADD COLUMN geom geometry(Point, 4326);
+ALTER TABLE region
+    ADD COLUMN IF NOT EXISTS geom geometry(Point, 4326);
 
 UPDATE region
 SET geom = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)
