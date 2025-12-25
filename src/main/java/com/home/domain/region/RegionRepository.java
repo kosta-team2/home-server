@@ -33,64 +33,22 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 	);
 
 	@Query("""
-		    SELECT new com.home.infrastructure.web.map.dto.RegionMarkersResponse(
-		        r.id, r.regionName, r.latitude, r.longitude,
-		        COALESCE(CAST(SUM(c.unitCnt) AS long), 0L)
-		    )
-		    FROM Region r
-		    LEFT JOIN Parcel p ON p.region = r
-		    LEFT JOIN Complex c ON c.parcel = p
-		    WHERE r.level = com.home.domain.region.RegionLevel.EUP_MYEON_DONG
-		      AND r.latitude  BETWEEN :swLat AND :neLat
-		      AND r.longitude BETWEEN :swLng AND :neLng
-		    GROUP BY r.id, r.regionName, r.latitude, r.longitude
-		""")
-	List<RegionMarkersResponse> findEmdMarkersWithUnitSumByBoundary(
+    SELECT new com.home.infrastructure.web.map.dto.RegionMarkersResponse(
+        r.id, r.regionName, r.latitude, r.longitude
+    )
+    FROM Region r
+    WHERE r.level = :level
+      AND r.latitude  BETWEEN :swLat AND :neLat
+      AND r.longitude BETWEEN :swLng AND :neLng
+""")
+	List<RegionMarkersResponse> findMarkersByLevelAndBoundary(
+		@Param("level") RegionLevel level,
 		@Param("swLat") Double swLat,
 		@Param("swLng") Double swLng,
 		@Param("neLat") Double neLat,
 		@Param("neLng") Double neLng
 	);
 
-	@Query("""
-		    SELECT new com.home.infrastructure.web.map.dto.RegionMarkersResponse(
-		        r.id, r.regionName, r.latitude, r.longitude,
-		        COALESCE(CAST(SUM(c.unitCnt) AS long), 0L)
-		    )
-		    FROM Region r
-		    LEFT JOIN Parcel p ON p.region.parent = r
-		    LEFT JOIN Complex c ON c.parcel = p
-		    WHERE r.level = com.home.domain.region.RegionLevel.SIGUNGU
-		      AND r.latitude  BETWEEN :swLat AND :neLat
-		      AND r.longitude BETWEEN :swLng AND :neLng
-		    GROUP BY r.id, r.regionName, r.latitude, r.longitude
-		""")
-	List<RegionMarkersResponse> findSigunguMarkersWithUnitSumByBoundary(
-		@Param("swLat") Double swLat,
-		@Param("swLng") Double swLng,
-		@Param("neLat") Double neLat,
-		@Param("neLng") Double neLng
-	);
-
-	@Query("""
-		    SELECT new com.home.infrastructure.web.map.dto.RegionMarkersResponse(
-		        r.id, r.regionName, r.latitude, r.longitude,
-		        COALESCE(CAST(SUM(c.unitCnt) AS long), 0L)
-		    )
-		    FROM Region r
-		    LEFT JOIN Parcel p ON p.region.parent.parent = r
-		    LEFT JOIN Complex c ON c.parcel = p
-		    WHERE r.level = com.home.domain.region.RegionLevel.SIDO
-		      AND r.latitude  BETWEEN :swLat AND :neLat
-		      AND r.longitude BETWEEN :swLng AND :neLng
-		    GROUP BY r.id, r.regionName, r.latitude, r.longitude
-		""")
-	List<RegionMarkersResponse> findSidoMarkersWithUnitSumByBoundary(
-		@Param("swLat") Double swLat,
-		@Param("swLng") Double swLng,
-		@Param("neLat") Double neLat,
-		@Param("neLng") Double neLng
-	);
 
 	List<Region> findAllByLevel(RegionLevel level);
 
