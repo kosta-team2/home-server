@@ -43,7 +43,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
       AND r.geom IS NOT NULL
       AND r.geom && ST_MakeEnvelope(:swLng, :swLat, :neLng, :neLat, 4326)
 """, nativeQuery = true)
-	List<RegionMarkersResponse> findMarkersByLevelAndBoundary(
+	List<RegionMarkersResponse> findAllRegionMarkersByLevelAndBoundary(
 		@Param("level") String level,
 		@Param("swLat") Double swLat,
 		@Param("swLng") Double swLng,

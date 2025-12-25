@@ -33,7 +33,7 @@ public class MapUseCase {
 			default -> throw new MapApiException(ErrorCode.INVALID_PARAMETER);
 		};
 
-		return regionRepository.findMarkersByLevelAndBoundary(
+		return regionRepository.findAllRegionMarkersByLevelAndBoundary(
 			level.name(),
 			req.swLat(), req.swLng(), req.neLat(), req.neLng()
 		);
