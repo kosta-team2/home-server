@@ -40,8 +40,8 @@ LEFT JOIN LATERAL (
 ) lt ON true
 
 WHERE p.deleted_at IS NULL
-  AND p.latitude  BETWEEN :swLat AND :neLat
-  AND p.longitude BETWEEN :swLng AND :neLng
+  AND p.geom IS NOT NULL
+  AND p.geom && ST_MakeEnvelope(:swLng, :swLat, :neLng, :neLat, 4326)
 
   AND (:unitMin IS NULL OR COALESCE(ua.unit_cnt_sum,0) >= :unitMin)
   AND (:unitMax IS NULL OR COALESCE(ua.unit_cnt_sum,0) <= :unitMax)
