@@ -33,17 +33,10 @@ public class MapUseCase {
 			default -> throw new MapApiException(ErrorCode.INVALID_PARAMETER);
 		};
 
-		return switch (level) {
-			case SIDO -> regionRepository.findSidoMarkersWithUnitSumByBoundary(
-				req.swLat(), req.swLng(), req.neLat(), req.neLng()
-			);
-			case SIGUNGU -> regionRepository.findSigunguMarkersWithUnitSumByBoundary(
-				req.swLat(), req.swLng(), req.neLat(), req.neLng()
-			);
-			case EUP_MYEON_DONG -> regionRepository.findEmdMarkersWithUnitSumByBoundary(
-				req.swLat(), req.swLng(), req.neLat(), req.neLng()
-			);
-		};
+		return regionRepository.findAllRegionMarkersByLevelAndBoundary(
+			level.name(),
+			req.swLat(), req.swLng(), req.neLat(), req.neLng()
+		);
 	}
 
 	public List<ParcelMarkerResponse> getComplexesByBoundary(ParcelMarkersRequest req) {
