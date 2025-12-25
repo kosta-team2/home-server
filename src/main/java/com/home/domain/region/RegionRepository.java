@@ -32,17 +32,19 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 		@Param("neLng") Double neLng
 	);
 
-	@Query("""
-    SELECT new com.home.infrastructure.web.map.dto.RegionMarkersResponse(
-        r.id, r.regionName, r.latitude, r.longitude
-    )
-    FROM Region r
+	@Query(value = """
+    SELECT
+        r.id            AS id,
+        r.name   AS regionName,
+        r.latitude      AS latitude,
+        r.longitude     AS longitude
+    FROM region r
     WHERE r.level = :level
-      AND r.latitude  BETWEEN :swLat AND :neLat
-      AND r.longitude BETWEEN :swLng AND :neLng
-""")
+      AND r.geom IS NOT NULL
+      AND r.geom && ST_MakeEnvelope(:swLng, :swLat, :neLng, :neLat, 4326)
+""", nativeQuery = true)
 	List<RegionMarkersResponse> findMarkersByLevelAndBoundary(
-		@Param("level") RegionLevel level,
+		@Param("level") String level,
 		@Param("swLat") Double swLat,
 		@Param("swLng") Double swLng,
 		@Param("neLat") Double neLat,

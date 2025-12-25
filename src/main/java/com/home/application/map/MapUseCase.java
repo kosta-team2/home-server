@@ -34,7 +34,7 @@ public class MapUseCase {
 		};
 
 		return regionRepository.findMarkersByLevelAndBoundary(
-			level,
+			level.name(),
 			req.swLat(), req.swLng(), req.neLat(), req.neLng()
 		);
 	}
