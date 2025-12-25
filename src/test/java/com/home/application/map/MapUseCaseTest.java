@@ -3,7 +3,6 @@ package com.home.application.map;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
 
 import java.util.List;
 
@@ -35,16 +34,15 @@ class MapUseCaseTest {
 	private MapUseCase mapUseCase;
 
 	@Test
-	@DisplayName("MarkersRequest.region이 'si-do'이면 SIDO 집계 쿼리를 호출한다")
+	@DisplayName("MarkersRequest.region이 'si-do'이면 level='SIDO'로 통합 쿼리를 호출한다")
 	void getAllRegionsByLevelAndBoundary_sido() {
 		// given
 		MarkersRequest req = new MarkersRequest(10.0, 20.0, 30.0, 40.0, "si-do");
 
-		List<RegionMarkersResponse> expected = List.of(
-			mock(RegionMarkersResponse.class)
-		);
+		List<RegionMarkersResponse> expected = List.of(mock(RegionMarkersResponse.class));
 
-		given(regionRepository.findSidoMarkersWithUnitSumByBoundary(
+		given(regionRepository.findAllRegionMarkersByLevelAndBoundary(
+			eq("SIDO"),
 			eq(10.0), eq(20.0), eq(30.0), eq(40.0)
 		)).willReturn(expected);
 
@@ -53,22 +51,22 @@ class MapUseCaseTest {
 
 		// then
 		assertThat(result).isEqualTo(expected);
-		verify(regionRepository).findSidoMarkersWithUnitSumByBoundary(10.0, 20.0, 30.0, 40.0);
-		verify(regionRepository, never()).findSigunguMarkersWithUnitSumByBoundary(any(), any(), any(), any());
-		verify(regionRepository, never()).findEmdMarkersWithUnitSumByBoundary(any(), any(), any(), any());
+		verify(regionRepository).findAllRegionMarkersByLevelAndBoundary("SIDO", 10.0, 20.0, 30.0, 40.0);
+
+		// 더 이상 분기 메서드 호출이 없어야 함(레포의 다른 호출 자체가 없는지)
+		verifyNoMoreInteractions(regionRepository);
 	}
 
 	@Test
-	@DisplayName("MarkersRequest.region이 'si-gun-gu'이면 SIGUNGU 집계 쿼리를 호출한다")
+	@DisplayName("MarkersRequest.region이 'si-gun-gu'이면 level='SIGUNGU'로 통합 쿼리를 호출한다")
 	void getAllRegionsByLevelAndBoundary_siGunGu() {
 		// given
 		MarkersRequest req = new MarkersRequest(1.0, 2.0, 3.0, 4.0, "si-gun-gu");
 
-		List<RegionMarkersResponse> expected = List.of(
-			mock(RegionMarkersResponse.class)
-		);
+		List<RegionMarkersResponse> expected = List.of(mock(RegionMarkersResponse.class));
 
-		given(regionRepository.findSigunguMarkersWithUnitSumByBoundary(
+		given(regionRepository.findAllRegionMarkersByLevelAndBoundary(
+			eq("SIGUNGU"),
 			eq(1.0), eq(2.0), eq(3.0), eq(4.0)
 		)).willReturn(expected);
 
@@ -77,22 +75,20 @@ class MapUseCaseTest {
 
 		// then
 		assertThat(result).isEqualTo(expected);
-		verify(regionRepository).findSigunguMarkersWithUnitSumByBoundary(1.0, 2.0, 3.0, 4.0);
-		verify(regionRepository, never()).findSidoMarkersWithUnitSumByBoundary(any(), any(), any(), any());
-		verify(regionRepository, never()).findEmdMarkersWithUnitSumByBoundary(any(), any(), any(), any());
+		verify(regionRepository).findAllRegionMarkersByLevelAndBoundary("SIGUNGU", 1.0, 2.0, 3.0, 4.0);
+		verifyNoMoreInteractions(regionRepository);
 	}
 
 	@Test
-	@DisplayName("MarkersRequest.region이 'eup-myeon-dong'이면 EMD 집계 쿼리를 호출한다")
+	@DisplayName("MarkersRequest.region이 'eup-myeon-dong'이면 level='EUP_MYEON_DONG'로 통합 쿼리를 호출한다")
 	void getAllRegionsByLevelAndBoundary_eupMyeonDong() {
 		// given
 		MarkersRequest req = new MarkersRequest(11.0, 22.0, 33.0, 44.0, "eup-myeon-dong");
 
-		List<RegionMarkersResponse> expected = List.of(
-			mock(RegionMarkersResponse.class)
-		);
+		List<RegionMarkersResponse> expected = List.of(mock(RegionMarkersResponse.class));
 
-		given(regionRepository.findEmdMarkersWithUnitSumByBoundary(
+		given(regionRepository.findAllRegionMarkersByLevelAndBoundary(
+			eq("EUP_MYEON_DONG"),
 			eq(11.0), eq(22.0), eq(33.0), eq(44.0)
 		)).willReturn(expected);
 
@@ -101,9 +97,8 @@ class MapUseCaseTest {
 
 		// then
 		assertThat(result).isEqualTo(expected);
-		verify(regionRepository).findEmdMarkersWithUnitSumByBoundary(11.0, 22.0, 33.0, 44.0);
-		verify(regionRepository, never()).findSidoMarkersWithUnitSumByBoundary(any(), any(), any(), any());
-		verify(regionRepository, never()).findSigunguMarkersWithUnitSumByBoundary(any(), any(), any(), any());
+		verify(regionRepository).findAllRegionMarkersByLevelAndBoundary("EUP_MYEON_DONG", 11.0, 22.0, 33.0, 44.0);
+		verifyNoMoreInteractions(regionRepository);
 	}
 
 	@Test
@@ -119,17 +114,14 @@ class MapUseCaseTest {
 				MapApiException e = (MapApiException) ex;
 				assertThat(e.getErrorCode()).isEqualTo(ErrorCode.INVALID_PARAMETER);
 			});
+
+		// 레포 호출이 없어야 함
+		verifyNoInteractions(regionRepository);
 	}
 
 	@Test
 	@DisplayName("경계값 + 필터로 Parcel 마커를 조회하며, priceEok 필터는 원(won)으로 변환되어 전달된다")
 	void getComplexesByBoundary_withFilters_priceEokConvertedToWon() {
-		// ✅ ParcelMarkersRequest 시그니처(순서):
-		// swLat, swLng, neLat, neLng,
-		// pyeongMin, pyeongMax,
-		// priceEokMin, priceEokMax,
-		// ageMin, ageMax,
-		// unitMin, unitMax
 		ParcelMarkersRequest req = new ParcelMarkersRequest(
 			10.0, 20.0,
 			30.0, 40.0,
@@ -139,9 +131,7 @@ class MapUseCaseTest {
 			500L, 3000L
 		);
 
-		List<ParcelMarkerResponse> expected = List.of(
-			mock(ParcelMarkerResponse.class)
-		);
+		List<ParcelMarkerResponse> expected = List.of(mock(ParcelMarkerResponse.class));
 
 		long priceMinWon = 1_860_000_000L;
 		long priceMaxWon = 8_000_000_000L;
@@ -209,7 +199,6 @@ class MapUseCaseTest {
 	@Test
 	@DisplayName("priceEok가 소수일 때 HALF_UP 반올림으로 원(won) 변환되어 전달된다")
 	void getComplexesByBoundary_priceEokRounding_halfUp() {
-		// 0.005억 * 100,000,000 = 500,000원 / 0.006억 => 600,000원
 		ParcelMarkersRequest req = new ParcelMarkersRequest(
 			1.0, 2.0,
 			3.0, 4.0,
