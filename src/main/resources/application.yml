@@ -93,6 +93,9 @@ app:
   mail:
     from-name: 홈서비스
 
+domain:
+  frontend:${FRONTEND_URL}
+
 apis:
   data:
     base-url: https://apis.data.go.kr
