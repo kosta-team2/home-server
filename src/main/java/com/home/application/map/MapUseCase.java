@@ -40,6 +40,12 @@ public class MapUseCase {
 	}
 
 	public List<ParcelMarkerResponse> getComplexesByBoundary(ParcelMarkersRequest req) {
+		// boundary에 해당하는 parcels 가져오기
+		
+		// parcelId에 해당하는 complex들을 조건을 찾기
+		// useDate가 오래된 한건으로 필터링하기
+
+
 		return parcelRepository.findParcelMarkersByBoundary(
 			req.swLat(), req.swLng(), req.neLat(), req.neLng(),
 			req.unitMin(), req.unitMax(),
