@@ -39,7 +39,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
 		ResponseCookie cookie = ResponseCookie.from("refresh_token", refreshRaw)
 			.httpOnly(true)
-			.secure(false) //TODO: 나중에 실제 환경에서 true로 승격
+			.secure(true)
 			.sameSite("Lax")
 			.path("/auth")
 			.maxAge(Duration.ofHours(24))
