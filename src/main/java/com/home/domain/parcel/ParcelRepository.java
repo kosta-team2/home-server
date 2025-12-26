@@ -29,13 +29,15 @@ LEFT JOIN (
 ) ua ON ua.parcel_id = p.id
 
 LEFT JOIN LATERAL (
-  SELECT t.deal_amount, t.excl_area, t.deal_date
-  FROM trade t
-  JOIN complex c ON c.id = t.complex_id
-  WHERE t.deleted_at IS NULL
-    AND c.deleted_at IS NULL
+  SELECT
+    c.latest_deal_amount AS deal_amount,
+    c.latest_excl_area   AS excl_area,
+    c.latest_deal_date   AS deal_date
+  FROM complex c
+  WHERE c.deleted_at IS NULL
     AND c.parcel_id = p.id
-  ORDER BY t.deal_date DESC, t.id DESC
+    AND c.latest_deal_date IS NOT NULL
+  ORDER BY c.latest_deal_date DESC, c.id DESC
   LIMIT 1
 ) lt ON true
 
