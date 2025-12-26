@@ -94,7 +94,7 @@ app:
     from-name: 홈서비스
 
 domain:
-  frontend:${FRONTEND_URL}
+  frontend: ${FRONTEND_URL}
 
 apis:
   data:
