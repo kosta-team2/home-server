@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  batch:
+    image: 883105810904.dkr.ecr.ap-northeast-2.amazonaws.com/backend-portfolio:latest
+    container_name: home-batch
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: batch
+      SPRING_BATCH_JOB_NAME: tradeDailyJob
+      OLTP_RDS_HOST: ${RDS_HOST}
+      OLAP_RDS_HOST: ${RDS_BATCH_HOST}
+      RDS_PASSWORD: ${RDS_PASSWORD}
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    restart: "no"

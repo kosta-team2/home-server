@@ -1,0 +1,37 @@
+spring:
+  main:
+    web-application-type: none
+
+  batch:
+    job:
+      enabled: true
+      name: ${SPRING_BATCH_JOB_NAME}
+    jdbc:
+      initialize-schema: never
+
+  datasource:
+    oltp:
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://${RDS_HOST}:5432/home
+      username: home_user
+      password: ${RDS_PASSWORD}
+      hikari:
+        maximum-pool-size: 5
+
+    olap:
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://${RDS_BATCH_HOSTㅁ}:5432/home_batch
+      username: home_user
+      password: ${RDS_PASSWORD}
+      hikari:
+        maximum-pool-size: 10
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+  flyway:
+    enabled: true
+    locations:
+      - classpath:db/migration/common
+      - classpath:db/migration/batch
