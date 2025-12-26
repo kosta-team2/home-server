@@ -20,7 +20,7 @@ spring:
 
     olap:
       driver-class-name: org.postgresql.Driver
-      url: jdbc:postgresql://${RDS_BATCH_HOSTㅁ}:5432/home_batch
+      url: jdbc:postgresql://${RDS_BATCH_HOST}:5432/home_batch
       username: home_user
       password: ${RDS_PASSWORD}
       hikari:
