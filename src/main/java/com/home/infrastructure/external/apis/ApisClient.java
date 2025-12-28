@@ -6,12 +6,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.home.infrastructure.external.apis.dto.ApisAptTradeResponse;
 import com.home.infrastructure.external.apis.dto.ApisBldRecapResponse;
 import com.home.infrastructure.external.apis.dto.ApisRecapResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
+//TODO: api 예외 처리 해보기
 @Component
 @Slf4j
 public class ApisClient {
@@ -23,6 +25,7 @@ public class ApisClient {
 	private final String bldServiceKey;
 	private final String bldPath;
 	private final String recapPath;
+	private final ObjectMapper objectMapper;
 
 	public ApisClient(
 		@Value("${apis.data.base-url}") String baseUrl,
@@ -30,8 +33,10 @@ public class ApisClient {
 		@Value("${apis.data.apt-title-path}") String aptPath,
 		@Value("${apis.data.bld-service-key}") String bldServiceKey,
 		@Value("${apis.data.bld-title-path}") String bldPath,
-		@Value("${apis.data.recap-title-path}") String recapPath
+		@Value("${apis.data.recap-title-path}") String recapPath,
+		ObjectMapper objectMapper
 	) {
+		this.objectMapper = objectMapper;
 		var factory = new SimpleClientHttpRequestFactory();
 		factory.setConnectTimeout(5_000);
 		factory.setReadTimeout(5_000);
@@ -62,18 +67,31 @@ public class ApisClient {
 		String lawdCd,
 		String dealYmd
 	) {
-		return client.get()
-			.uri(uriBuilder -> uriBuilder
-				.path(aptPath)
-				.queryParam("_type", "json")
-				.queryParam("serviceKey", aptServiceKey)
-				.queryParam("LAWD_CD", lawdCd)
-				.queryParam("DEAL_YMD", dealYmd)
-				.queryParam("pageNo", pageNo)
-				.queryParam("numOfRows", numOfRows)
-				.build())
-			.retrieve()
-			.body(ApisAptTradeResponse.class);
+		try {
+			String raw = client.get()
+				.uri(uriBuilder -> uriBuilder
+					.path(aptPath)
+					.queryParam("_type", "json")
+					.queryParam("serviceKey", aptServiceKey)
+					.queryParam("LAWD_CD", lawdCd)
+					.queryParam("DEAL_YMD", dealYmd)
+					.queryParam("pageNo", pageNo)
+					.queryParam("numOfRows", numOfRows)
+					.build())
+				.retrieve()
+				.body(String.class);
+
+			if (raw == null || raw.isBlank()) {
+				return new ApisAptTradeResponse();
+			}
+
+			return objectMapper.readValue(raw, ApisAptTradeResponse.class);
+
+		} catch (Exception e) {
+			log.warn("[AptTrade] 응답 파싱 실패. p={}, n={}, l={}, d={}",
+				pageNo, numOfRows, lawdCd, dealYmd, e);
+			return new ApisAptTradeResponse();
+		}
 	}
 
 	/**
