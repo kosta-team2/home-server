@@ -2,13 +2,13 @@ package com.home.infrastructure.batch.trade;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
-
 
 public class TradeMonthSggPartitioner implements Partitioner {
 
@@ -38,11 +38,17 @@ public class TradeMonthSggPartitioner implements Partitioner {
 
 		for (YearMonth ym = from; !ym.isAfter(to); ym = ym.plusMonths(1)) {
 			for (int i = 0; i < sggCodes.size(); i += groupSize) {
+
+				List<String> chunk =
+					new ArrayList<>(sggCodes.subList(
+						i,
+						Math.min(i + groupSize, sggCodes.size())
+					));
+
 				ExecutionContext ec = new ExecutionContext();
 				ec.putString("dealYmd", ym.format(F));
-				ec.put("sggCodes",
-					sggCodes.subList(i, Math.min(i + groupSize, sggCodes.size()))
-				);
+				ec.put("sggCodes", chunk);
+
 				map.put("partition-" + (idx++), ec);
 			}
 		}
