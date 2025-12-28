@@ -11,6 +11,7 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,7 +44,7 @@ public class TradeAlarmBatchConfig {
 	@Bean
 	public Step buildMailTargetsStep(JobRepository jobRepository,
 		PlatformTransactionManager tx,
-		NamedParameterJdbcTemplate namedJdbc) {
+		@Qualifier("oltpJdbc") NamedParameterJdbcTemplate namedJdbc) {
 		return new StepBuilder("buildMailTargetsStep", jobRepository)
 			.tasklet(new BuildMailTargetsTasklet(namedJdbc), tx)
 			.build();
