@@ -1,4 +1,16 @@
 spring:
+  mail:
+    host: smtp.naver.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   batch:
     job:
       enabled: false
@@ -78,6 +90,11 @@ app:
     secret: ${JWT_SECRET}
     issuer: home-local
     access-minutes: 30
+  mail:
+    from-name: 홈서비스
+
+domain:
+  frontend: ${FRONTEND_URL}
 
 apis:
   data:

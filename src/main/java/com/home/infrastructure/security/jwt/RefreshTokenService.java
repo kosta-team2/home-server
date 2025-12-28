@@ -32,12 +32,21 @@ public class RefreshTokenService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new IllegalStateException("User not found: " + userId));
 
+		Instant now = Instant.now();
+
+		refreshTokenRepository
+			.findByUserIdAndRevokedAtIsNull(userId)
+			.ifPresent(token -> token.revoke(now));
+
 		String raw = generateRawToken();
 		String hash = sha256Hex(raw);
 
-		Instant expiresAt = Instant.now().plus(ttl);
+		Instant expiresAt = now.plus(ttl);
 
-		refreshTokenRepository.save(RefreshToken.issue(user, hash, expiresAt));
+		refreshTokenRepository.save(
+			RefreshToken.issue(user, hash, expiresAt)
+		);
+
 		return raw;
 	}
 

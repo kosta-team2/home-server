@@ -55,7 +55,7 @@ public class MapUseCase {
 	private Long eokToWon(Double eok) {
 		if (eok == null) return null;
 		return java.math.BigDecimal.valueOf(eok)
-			.multiply(java.math.BigDecimal.valueOf(100_000_000L))
+			.multiply(java.math.BigDecimal.valueOf(10_000L))
 			.setScale(0, java.math.RoundingMode.HALF_UP)
 			.longValue();
 	}
