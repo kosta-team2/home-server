@@ -57,4 +57,6 @@ public class Region {
 	@JoinColumn(name = "parent_id")
 	private Region parent;
 
+	@Column(name = "trend_30d")
+	private Double trend30d;
 }

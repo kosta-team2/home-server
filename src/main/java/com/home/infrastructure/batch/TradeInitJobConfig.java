@@ -85,7 +85,7 @@ public class TradeInitJobConfig {
 
 		return new TradeMonthSggPartitioner(
 			sggCodes,
-			YearMonth.of(2010, 1),
+			YearMonth.of(2025, 1),
 			YearMonth.of(2025, 12),
 			30
 		);
