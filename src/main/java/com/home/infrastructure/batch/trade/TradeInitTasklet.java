@@ -51,6 +51,9 @@ public class TradeInitTasklet implements Tasklet {
 	@Value("#{stepExecutionContext['dealYmd']}")
 	private String dealYmd;
 
+	@Value("#{stepExecutionContext['sggCodes']}")
+	private List<String> sggCodes;
+
 	public TradeInitTasklet(
 		ApisClient apisClient,
 		TradeBulkWriter tradeBulkWriter,
@@ -69,19 +72,15 @@ public class TradeInitTasklet implements Tasklet {
 		long inserted = ec.containsKey(EC_INSERTED) ? ec.getLong(EC_INSERTED) : 0L;
 		long skipped = ec.containsKey(EC_SKIPPED) ? ec.getLong(EC_SKIPPED) : 0L;
 
-		List<String> sggCodes = olapJdbc.queryForList(
-			"select sgg_code from region where level = 'SIGUNGU'",
-			Map.of(),
-			String.class
-		);
-
 		List<TradeRow> batch = new ArrayList<>(BATCH_SIZE);
 
 		for (String sggCode : sggCodes) {
 			int pageNo = 1;
 
 			while (true) {
-				List<ApisAptTradeDto> apisList = apisClient.getAptTrade(pageNo, PAGE_SIZE, sggCode, dealYmd).toApisDto();
+				List<ApisAptTradeDto> apisList =
+					apisClient.getAptTrade(pageNo, PAGE_SIZE, sggCode, dealYmd).toApisDto();
+
 				if (apisList == null || apisList.isEmpty()) break;
 
 				for (ApisAptTradeDto dto : apisList) {
@@ -99,17 +98,8 @@ public class TradeInitTasklet implements Tasklet {
 						continue;
 					}
 
-					LocalDate dealDate = LocalDate.of(dto.dealYear(), dto.dealMonth(), dto.dealDay());
-
-					//TODO: 나중에 다시 풀기 지금 데드락에 걸린다.
-					// if (hasText(dto.aptSeq())) {
-					// 	AptSeqUpdateResult u = upsertComplexAptSeq(resolved.complexPk(), dto.aptSeq(), dto);
-					// 	if (u.changed()) {
-					// 		if (hasText(u.oldAptSeq())) aptSeqToComplexPkCache.remove(u.oldAptSeq());
-					// 	}
-					// 	aptSeqToComplexPkCache.put(dto.aptSeq(), resolved.complexPk());
-					// 	aptSeqMissCache.remove(dto.aptSeq());
-					// }
+					LocalDate dealDate =
+						LocalDate.of(dto.dealYear(), dto.dealMonth(), dto.dealDay());
 
 					batch.add(new TradeRow(
 						dealDate,
@@ -147,9 +137,14 @@ public class TradeInitTasklet implements Tasklet {
 		ec.putLong(EC_INSERTED, inserted);
 		ec.putLong(EC_SKIPPED, skipped);
 
-		log.info("[BATCH][tradeInit] dealYmd={}, read={}, inserted={}, skipped={}", dealYmd, read, inserted, skipped);
+		log.info(
+			"[BATCH][tradeInit] dealYmd={}, sggCount={}, read={}, inserted={}, skipped={}",
+			dealYmd, sggCodes.size(), read, inserted, skipped
+		);
+
 		return RepeatStatus.FINISHED;
 	}
+
 
 	private ResolvedComplex resolveComplex(ApisAptTradeDto dto) {
 		// 1) aptSeq direct

@@ -1,6 +1,8 @@
 package com.home.infrastructure.batch;
 
 import java.time.YearMonth;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -12,12 +14,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.home.infrastructure.batch.trade.TradeInitStepListener;
 import com.home.infrastructure.batch.trade.TradeInitTasklet;
-import com.home.infrastructure.batch.trade.TradeMonthPartitioner;
+import com.home.infrastructure.batch.trade.TradeMonthSggPartitioner;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,10 +31,16 @@ public class TradeInitJobConfig {
 
 	private final JobRepository jobRepository;
 	private final PlatformTransactionManager transactionManager;
+	private final NamedParameterJdbcTemplate olapJdbc;
 
-	public TradeInitJobConfig(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+	public TradeInitJobConfig(
+		JobRepository jobRepository,
+		PlatformTransactionManager transactionManager,
+		NamedParameterJdbcTemplate olapJdbc
+	) {
 		this.jobRepository = jobRepository;
 		this.transactionManager = transactionManager;
+		this.olapJdbc = olapJdbc;
 	}
 
 	@Bean
@@ -42,20 +51,24 @@ public class TradeInitJobConfig {
 	}
 
 	@Bean
-	public Step tradeMasterStep(Step tradeWorkerStep, Partitioner tradeMonthPartitioner,
-		TaskExecutor tradeInitTaskExecutor) {
-		int gridSize = 8;
-
+	public Step tradeMasterStep(
+		Step tradeWorkerStep,
+		Partitioner tradePartitioner,
+		TaskExecutor tradeInitTaskExecutor
+	) {
 		return new StepBuilder("tradeMasterStep", jobRepository)
-			.partitioner("tradeWorkerStep", tradeMonthPartitioner)
+			.partitioner("tradeWorkerStep", tradePartitioner)
 			.step(tradeWorkerStep)
-			.gridSize(gridSize)
+			.gridSize(8)
 			.taskExecutor(tradeInitTaskExecutor)
 			.build();
 	}
 
 	@Bean
-	public Step tradeWorkerStep(TradeInitTasklet tasklet, TradeInitStepListener listener) {
+	public Step tradeWorkerStep(
+		TradeInitTasklet tasklet,
+		TradeInitStepListener listener
+	) {
 		return new StepBuilder("tradeWorkerStep", jobRepository)
 			.tasklet(tasklet, transactionManager)
 			.listener(listener)
@@ -63,8 +76,19 @@ public class TradeInitJobConfig {
 	}
 
 	@Bean
-	public Partitioner tradeMonthPartitioner() {
-		return new TradeMonthPartitioner(YearMonth.of(2010, 1), YearMonth.of(2025, 12));
+	public Partitioner tradePartitioner() {
+		List<String> sggCodes = olapJdbc.queryForList(
+			"select sgg_code from region where level = :level",
+			Map.of("level", "SIGUNGU"),
+			String.class
+		);
+
+		return new TradeMonthSggPartitioner(
+			sggCodes,
+			YearMonth.of(2010, 1),
+			YearMonth.of(2025, 12),
+			30
+		);
 	}
 
 	@Bean
