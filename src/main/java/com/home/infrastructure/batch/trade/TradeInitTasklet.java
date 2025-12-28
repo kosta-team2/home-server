@@ -101,14 +101,15 @@ public class TradeInitTasklet implements Tasklet {
 
 					LocalDate dealDate = LocalDate.of(dto.dealYear(), dto.dealMonth(), dto.dealDay());
 
-					if (hasText(dto.aptSeq())) {
-						AptSeqUpdateResult u = upsertComplexAptSeq(resolved.complexPk(), dto.aptSeq(), dto);
-						if (u.changed()) {
-							if (hasText(u.oldAptSeq())) aptSeqToComplexPkCache.remove(u.oldAptSeq());
-						}
-						aptSeqToComplexPkCache.put(dto.aptSeq(), resolved.complexPk());
-						aptSeqMissCache.remove(dto.aptSeq());
-					}
+					//TODO: 나중에 다시 풀기 지금 데드락에 걸린다.
+					// if (hasText(dto.aptSeq())) {
+					// 	AptSeqUpdateResult u = upsertComplexAptSeq(resolved.complexPk(), dto.aptSeq(), dto);
+					// 	if (u.changed()) {
+					// 		if (hasText(u.oldAptSeq())) aptSeqToComplexPkCache.remove(u.oldAptSeq());
+					// 	}
+					// 	aptSeqToComplexPkCache.put(dto.aptSeq(), resolved.complexPk());
+					// 	aptSeqMissCache.remove(dto.aptSeq());
+					// }
 
 					batch.add(new TradeRow(
 						dealDate,
