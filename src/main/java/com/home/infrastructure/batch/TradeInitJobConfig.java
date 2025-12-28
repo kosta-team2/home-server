@@ -71,8 +71,8 @@ public class TradeInitJobConfig {
 	public TaskExecutor tradeInitTaskExecutor() {
 		ThreadPoolTaskExecutor exec = new ThreadPoolTaskExecutor();
 		exec.setThreadNamePrefix("trade-init-");
-		exec.setCorePoolSize(6);
-		exec.setMaxPoolSize(6);
+		exec.setCorePoolSize(8);
+		exec.setMaxPoolSize(8);
 		exec.setQueueCapacity(200);
 		exec.initialize();
 		return exec;
