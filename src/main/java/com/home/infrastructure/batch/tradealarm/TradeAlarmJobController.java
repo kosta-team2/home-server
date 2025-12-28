@@ -6,12 +6,14 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 // test용임, 실제 운영에서는 스케줄러 쓸거임.
 @RestController
+@Profile("prod")
 public class TradeAlarmJobController {
 
 	private final JobLauncher jobLauncher;
