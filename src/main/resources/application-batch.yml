@@ -4,7 +4,7 @@ spring:
 
   batch:
     job:
-      enabled: true
+      enabled: false
       name: ${SPRING_BATCH_JOB_NAME}
     jdbc:
       initialize-schema: never
