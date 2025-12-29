@@ -96,9 +96,13 @@ public class ApisAptTradeResponse {
 	}
 
 	public List<ApisAptTradeDto> toApisDto() {
-		if (response.getBody().getItems() == null) {
+		if (response == null ||
+			response.getBody() == null ||
+			response.getBody().getItems() == null ||
+			response.getBody().getItems().getItem() == null) {
 			return List.of();
 		}
+
 
 		return response.getBody().getItems().getItem().stream()
 			.map(item -> new ApisAptTradeDto(

@@ -4,6 +4,7 @@ public record RegionMarkersResponse(
 	Long id,
 	String name,
 	Double lat,
-	Double lng
+	Double lng,
+	Double trend
 ) {
 }
