@@ -40,30 +40,32 @@ public class TradeTopVolumeTasklet implements Tasklet {
 
 		List<TopVolumeRow> rows = olapJdbc.query(
 			"""
-			select
-			    region_id,
-			    rank,
-			    complex_id,
-			    deal_count
-			from (
-			    select
-			        r.id as region_id,
-			        c.id as complex_id,
-			        count(*) as deal_count,
-			        row_number() over (
-			            partition by r.id
-			            order by count(*) desc
-			        ) as rank
-			    from trade t
-			    join complex c on t.complex_pk = c.complex_pk
-			    join parcel p on c.parcel_id = p.id
-			    join region r on p.region_id = r.id
-			    where t.deal_date >= :fromDate
-			    group by r.id, c.id
-			) ranked
-			where rank <= 10
-			order by region_id, rank
-			""",
+				select
+				    sido_id as region_id,
+				    rank,
+				    complex_id,
+				    deal_count
+				from (
+				    select
+				        sido.id as sido_id,
+				        c.id as complex_id,
+				        count(*) as deal_count,
+				        row_number() over (
+				            partition by sido.id
+				            order by count(*) desc
+				        ) as rank
+				    from trade t
+				    join complex c on t.complex_pk = c.complex_pk
+				    join parcel p on c.parcel_id = p.id
+				    join region emd on p.region_id = emd.id
+				    join region sgg on emd.parent_id = sgg.id
+				    join region sido on sgg.parent_id = sido.id
+				    where t.deal_date >= :fromDate
+				    group by sido.id, c.id
+				) ranked
+				where rank <= 10
+				order by region_id, rank;
+				""",
 			Map.of("fromDate", today.minusDays(30)),
 			(rs, i) -> new TopVolumeRow(
 				rs.getLong("region_id"),
