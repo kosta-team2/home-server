@@ -33,7 +33,8 @@ class ApisClientTest {
 			"/RTMSDataSvcAptTradeDev",
 			"DUMMY_BLD_KEY",
 			"/BldRgstHubService/getBrRecapTitleInfo",
-			"/BldRgstHubService/getBrTitleInfo"
+			"/BldRgstHubService/getBrTitleInfo",
+			null
 		);
 	}
 
