@@ -13,63 +13,74 @@ public interface ParcelRepository extends JpaRepository<Parcel, Long> {
 	Optional<Parcel> findByPnu(String pnu);
 
 	@Query(value = """
+WITH pbox AS (
+    SELECT p.id, p.latitude, p.longitude
+    FROM parcel p
+    WHERE p.deleted_at IS NULL
+      AND p.geom IS NOT NULL
+      AND p.geom && ST_MakeEnvelope(:swLng, :swLat, :neLng, :neLat, 4326)
+),
+ua AS (
+    SELECT c.parcel_id, COALESCE(SUM(c.unit_cnt), 0) AS unit_cnt_sum
+    FROM complex c
+    JOIN pbox p ON p.id = c.parcel_id
+    WHERE c.deleted_at IS NULL
+    GROUP BY c.parcel_id
+)
 SELECT
-  p.id        AS id,
-  p.latitude  AS lat,
-  p.longitude AS lng,
-  lt.deal_amount AS latestDealAmount,
-  COALESCE(ua.unit_cnt_sum, 0) AS unitCntSum
-FROM parcel p
-
-LEFT JOIN (
-  SELECT c.parcel_id, COALESCE(SUM(c.unit_cnt),0) AS unit_cnt_sum
-  FROM complex c
-  WHERE c.deleted_at IS NULL
-  GROUP BY c.parcel_id
-) ua ON ua.parcel_id = p.id
+    p.id        AS id,
+    p.latitude  AS lat,
+    p.longitude AS lng,
+    lt.deal_amount AS latestDealAmount,
+    COALESCE(ua.unit_cnt_sum, 0) AS unitCntSum
+FROM pbox p
+LEFT JOIN ua ON ua.parcel_id = p.id
 
 LEFT JOIN LATERAL (
-  SELECT t.deal_amount, t.excl_area, t.deal_date
-  FROM trade t
-  JOIN complex c ON c.id = t.complex_id
-  WHERE t.deleted_at IS NULL
-    AND c.deleted_at IS NULL
-    AND c.parcel_id = p.id
-  ORDER BY t.deal_date DESC, t.id DESC
-  LIMIT 1
+    SELECT x.deal_amount, x.excl_area, x.deal_date, x.id
+    FROM complex c
+    JOIN LATERAL (
+        SELECT t.deal_amount, t.excl_area, t.deal_date, t.id
+        FROM trade t
+        WHERE t.deleted_at IS NULL
+          AND t.complex_id = c.id
+        ORDER BY t.deal_date DESC, t.id DESC
+        LIMIT 1
+    ) x ON true
+    WHERE c.deleted_at IS NULL
+      AND c.parcel_id = p.id
+    ORDER BY x.deal_date DESC, x.id DESC
+    LIMIT 1
 ) lt ON true
 
-WHERE p.deleted_at IS NULL
-  AND p.geom IS NOT NULL
-  AND p.geom && ST_MakeEnvelope(:swLng, :swLat, :neLng, :neLat, 4326)
+WHERE
+    (:unitMin IS NULL OR COALESCE(ua.unit_cnt_sum, 0) >= :unitMin)
+AND (:unitMax IS NULL OR COALESCE(ua.unit_cnt_sum, 0) <= :unitMax)
 
-  AND (:unitMin IS NULL OR COALESCE(ua.unit_cnt_sum,0) >= :unitMin)
-  AND (:unitMax IS NULL OR COALESCE(ua.unit_cnt_sum,0) <= :unitMax)
+AND (:priceMinWon IS NULL OR lt.deal_amount >= :priceMinWon)
+AND (:priceMaxWon IS NULL OR lt.deal_amount <= :priceMaxWon)
 
-  AND (:priceMinWon IS NULL OR lt.deal_amount >= :priceMinWon)
-  AND (:priceMaxWon IS NULL OR lt.deal_amount <= :priceMaxWon)
-
-  AND (
+AND (
     (:pyeongMin IS NULL AND :pyeongMax IS NULL)
     OR (
-      lt.excl_area IS NOT NULL
-      AND (:pyeongMin IS NULL OR ROUND(lt.excl_area/3.3)::int >= :pyeongMin)
-      AND (:pyeongMax IS NULL OR ROUND(lt.excl_area/3.3)::int <= :pyeongMax)
+        lt.excl_area IS NOT NULL
+        AND (:pyeongMin IS NULL OR ROUND(lt.excl_area / 3.3)::int >= :pyeongMin)
+        AND (:pyeongMax IS NULL OR ROUND(lt.excl_area / 3.3)::int <= :pyeongMax)
     )
-  )
+)
 
-  AND (
+AND (
     (:ageMin IS NULL AND :ageMax IS NULL)
     OR EXISTS (
-      SELECT 1
-      FROM complex c2
-      WHERE c2.deleted_at IS NULL
-        AND c2.parcel_id = p.id
-        AND c2.use_date IS NOT NULL
-        AND (:ageMin IS NULL OR EXTRACT(YEAR FROM AGE(CURRENT_DATE, c2.use_date)) >= :ageMin)
-        AND (:ageMax IS NULL OR EXTRACT(YEAR FROM AGE(CURRENT_DATE, c2.use_date)) <= :ageMax)
+        SELECT 1
+        FROM complex c2
+        WHERE c2.deleted_at IS NULL
+          AND c2.parcel_id = p.id
+          AND c2.use_date IS NOT NULL
+          AND (:ageMin IS NULL OR EXTRACT(YEAR FROM AGE(CURRENT_DATE, c2.use_date)) >= :ageMin)
+          AND (:ageMax IS NULL OR EXTRACT(YEAR FROM AGE(CURRENT_DATE, c2.use_date)) <= :ageMax)
     )
-  )
+)
 """, nativeQuery = true)
 	List<ParcelMarkerResponse> findParcelMarkersByBoundary(
 		@Param("swLat") Double swLat,

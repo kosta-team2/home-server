@@ -3,6 +3,7 @@ package com.home.application.map;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.home.domain.parcel.ParcelRepository;
 import com.home.domain.region.RegionLevel;
@@ -25,6 +26,7 @@ public class MapUseCase {
 	private final RegionRepository regionRepository;
 	private final ParcelRepository parcelRepository;
 
+	@Transactional(readOnly = true)
 	public List<RegionMarkersResponse> getAllRegionsByLevelAndBoundary(MarkersRequest req) {
 		RegionLevel level = switch (req.region()) {
 			case "si-do" -> RegionLevel.SIDO;
@@ -39,6 +41,7 @@ public class MapUseCase {
 		);
 	}
 
+	@Transactional(readOnly = true)
 	public List<ParcelMarkerResponse> getComplexesByBoundary(ParcelMarkersRequest req) {
 		return parcelRepository.findParcelMarkersByBoundary(
 			req.swLat(), req.swLng(), req.neLat(), req.neLng(),
