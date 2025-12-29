@@ -6,7 +6,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.home.infrastructure.external.apis.dto.ApisAptTradeResponse;
 import com.home.infrastructure.external.apis.dto.ApisBldRecapResponse;
 import com.home.infrastructure.external.apis.dto.ApisRecapResponse;
@@ -85,7 +87,19 @@ public class ApisClient {
 				return new ApisAptTradeResponse();
 			}
 
-			return objectMapper.readValue(raw, ApisAptTradeResponse.class);
+			JsonNode root = objectMapper.readTree(raw);
+
+			JsonNode bodyNode = root
+				.path("response")
+				.path("body");
+
+			JsonNode itemsNode = bodyNode.path("items");
+
+			if (itemsNode.isTextual()) {
+				((ObjectNode) bodyNode).putNull("items");
+			}
+
+			return objectMapper.treeToValue(root, ApisAptTradeResponse.class);
 
 		} catch (Exception e) {
 			log.warn("[AptTrade] 응답 파싱 실패. p={}, n={}, l={}, d={}",
