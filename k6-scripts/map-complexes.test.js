@@ -11,6 +11,7 @@ import {check, sleep} from 'k6';
  * - 1분간 테스트
  * 전체 요청 중 95%가 800ms 안에 끝나야 한다
  * 10명이 1분 동안 최대한 자연스럽게 지도 API를 두드리는 시뮬레이션
+ * 필터 X
  */
 export const options = {
     vus: 10,
@@ -67,23 +68,13 @@ export default function () {
     const unitMax = unitMin + randomInt(500, 3000);
 
     const payload = JSON.stringify({
-        swLat,
-        swLng,
-        neLat,
-        neLng,
-
-        pyeongMin,
-        pyeongMax,
-
-        priceEokMin: Number(priceEokMin.toFixed(1)),
-        priceEokMax: Number(priceEokMax.toFixed(1)),
-
-        ageMin,
-        ageMax,
-
-        unitMin,
-        unitMax,
+        swLat, swLng, neLat, neLng,
+        pyeongMin: null, pyeongMax: null,
+        priceEokMin: null, priceEokMax: null,
+        ageMin: null, ageMax: null,
+        unitMin: null, unitMax: null,
     });
+
 
     const params = {
         headers: {
