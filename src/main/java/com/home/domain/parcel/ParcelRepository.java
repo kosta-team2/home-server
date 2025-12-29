@@ -35,16 +35,24 @@ SELECT
     COALESCE(ua.unit_cnt_sum, 0) AS unitCntSum
 FROM pbox p
 LEFT JOIN ua ON ua.parcel_id = p.id
+
 LEFT JOIN LATERAL (
-    SELECT t.deal_amount, t.excl_area, t.deal_date
-    FROM trade t
-    JOIN complex c ON c.id = t.complex_id
-    WHERE t.deleted_at IS NULL
-      AND c.deleted_at IS NULL
+    SELECT x.deal_amount, x.excl_area, x.deal_date, x.id
+    FROM complex c
+    JOIN LATERAL (
+        SELECT t.deal_amount, t.excl_area, t.deal_date, t.id
+        FROM trade t
+        WHERE t.deleted_at IS NULL
+          AND t.complex_id = c.id
+        ORDER BY t.deal_date DESC, t.id DESC
+        LIMIT 1
+    ) x ON true
+    WHERE c.deleted_at IS NULL
       AND c.parcel_id = p.id
-    ORDER BY t.deal_date DESC, t.id DESC
+    ORDER BY x.deal_date DESC, x.id DESC
     LIMIT 1
 ) lt ON true
+
 WHERE
     (:unitMin IS NULL OR COALESCE(ua.unit_cnt_sum, 0) >= :unitMin)
 AND (:unitMax IS NULL OR COALESCE(ua.unit_cnt_sum, 0) <= :unitMax)
@@ -64,7 +72,7 @@ AND (
 AND (
     (:ageMin IS NULL AND :ageMax IS NULL)
     OR EXISTS (
-    	SELECT 1
+        SELECT 1
         FROM complex c2
         WHERE c2.deleted_at IS NULL
           AND c2.parcel_id = p.id
