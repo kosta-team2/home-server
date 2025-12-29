@@ -46,7 +46,7 @@ public class TradeTrendTasklet implements Tasklet {
 			        r.parent_id as sgg_id,
 			        rp.parent_id as sido_id
 			    from trade t
-			    join complex c on t.complex_id = c.id
+			    join complex c on t.complex_pk = c.complex_pk
 			    join parcel p on c.parcel_id = p.id
 			    join region r on p.region_id = r.id
 			    left join region rp on r.parent_id = rp.id

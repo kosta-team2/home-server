@@ -55,7 +55,7 @@ public class TradeTopVolumeTasklet implements Tasklet {
 			            order by count(*) desc
 			        ) as rank
 			    from trade t
-			    join complex c on t.complex_id = c.id
+			    join complex c on t.complex_pk = c.complex_pk
 			    join parcel p on c.parcel_id = p.id
 			    join region r on p.region_id = r.id
 			    where t.deal_date >= :fromDate

@@ -53,7 +53,7 @@ public class TradeTopPriceTasklet implements Tasklet {
 				            order by max(t.deal_amount) desc
 				        ) as rank
 				    from trade t
-				    join complex c on t.complex_id = c.id
+				    join complex c on t.complex_pk = c.complex_pk
 				    where t.deal_date >= :fromDate
 				    group by c.id
 				) ranked
