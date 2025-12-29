@@ -95,8 +95,11 @@ public class ApisClient {
 
 			JsonNode itemsNode = bodyNode.path("items");
 
-			if (itemsNode.isTextual()) {
-				((ObjectNode) bodyNode).putNull("items");
+			if (
+				itemsNode.isTextual() ||
+					itemsNode.isObject() && !itemsNode.path("item").isArray()
+			) {
+				((ObjectNode)bodyNode).putNull("items");
 			}
 
 			return objectMapper.treeToValue(root, ApisAptTradeResponse.class);
