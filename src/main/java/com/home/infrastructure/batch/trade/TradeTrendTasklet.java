@@ -32,77 +32,109 @@ public class TradeTrendTasklet implements Tasklet {
 	}
 
 	@Override
-	public RepeatStatus execute(
-		StepContribution contribution,
-		ChunkContext chunkContext
-	) {
+	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
 
 		LocalDate today = LocalDate.now();
 
 		List<TrendRow> rows = olapJdbc.query(
 			"""
-			with base_trade as (
-			    select
-			        t.deal_date,
-			        (t.deal_amount / t.excl_area) as unit_price,
-			        r.id as emd_id,
-			        r.parent_id as sgg_id,
-			        rp.parent_id as sido_id
-			    from trade t
-			    join complex c on t.complex_pk = c.complex_pk
-			    join parcel p on c.parcel_id = p.id
-			    join region r on p.region_id = r.id
-			    left join region rp on r.parent_id = rp.id
-			    where t.deal_date >= :fromDate
-			      and t.excl_area > 0
-			),
-			region_trade as (
-			    select emd_id as region_id, deal_date, unit_price from base_trade
-			    union all
-			    select sgg_id, deal_date, unit_price from base_trade where sgg_id is not null
-			    union all
-			    select sido_id, deal_date, unit_price from base_trade where sido_id is not null
-			)
-			select
-			    region_id,
-			    avg(case
-			        when deal_date >= :recentFrom then unit_price
-			    end) as avg_recent,
-			    avg(case
-			        when deal_date < :recentFrom
-			         and deal_date >= :prevFrom then unit_price
-			    end) as avg_prev
-			from region_trade
-			group by region_id
-			""",
+				with base_trade as (
+					select
+						t.deal_date,
+						(t.deal_amount / t.excl_area) as unit_price,
+						c.complex_pk,
+						r.id as emd_id,
+						r.parent_id as sgg_id,
+						rp.parent_id as sido_id
+					from trade t
+					join complex c on t.complex_pk = c.complex_pk
+					join parcel p on c.parcel_id = p.id
+					join region r on p.region_id = r.id
+					left join region rp on r.parent_id = rp.id
+					where t.deal_date >= :fromDate
+					  and t.excl_area > 0
+				),
+				region_trade as (
+					select emd_id as region_id, complex_pk, deal_date, unit_price from base_trade
+					union all
+					select sgg_id, complex_pk, deal_date, unit_price from base_trade where sgg_id is not null
+					union all
+					select sido_id, complex_pk, deal_date, unit_price from base_trade where sido_id is not null
+				),
+				complex_window as (
+					select
+						region_id,
+						complex_pk,
+
+						avg(case
+							  when deal_date >= :recentFrom and deal_date < :today
+							  then unit_price
+							end) as avg_recent,
+
+						avg(case
+							  when deal_date >= :prevFrom and deal_date < :recentFrom
+							  then unit_price
+							end) as avg_prev,
+
+						count(case
+								when deal_date >= :recentFrom and deal_date < :today
+								then 1
+							  end) as cnt_recent,
+
+						count(case
+								when deal_date >= :prevFrom and deal_date < :recentFrom
+								then 1
+							  end) as cnt_prev
+					from region_trade
+					group by region_id, complex_pk
+				),
+				complex_trend as (
+					select
+						region_id,
+						((avg_recent - avg_prev) / avg_prev) as trend,
+						least(cnt_recent, cnt_prev) as weight
+					from complex_window
+					where avg_prev > 0
+					  and avg_recent > 0
+					  and cnt_recent >= :minTrades
+					  and cnt_prev >= :minTrades
+				)
+				select
+					region_id,
+					(sum(trend * weight) / nullif(sum(weight), 0)) as region_trend,
+					count(*) as complex_cnt
+				from complex_trend
+				group by region_id
+				""",
 			Map.of(
-				"fromDate", today.minusDays(60),
-				"recentFrom", today.minusDays(30),
-				"prevFrom", today.minusDays(60)
+				"today", today,
+				"fromDate", today.minusMonths(6),
+				"recentFrom", today.minusMonths(1),
+				"prevFrom", today.minusMonths(2),
+				"minTrades", 2
 			),
 			(rs, i) -> new TrendRow(
 				rs.getLong("region_id"),
-				rs.getDouble("avg_recent"),
-				rs.getDouble("avg_prev")
+				rs.getObject("region_trend", Double.class),
+				rs.getInt("complex_cnt")
 			)
 		);
 
 		int updated = 0;
 
 		for (TrendRow row : rows) {
-			if (row.avgPrev() <= 0 || row.avgRecent() <= 0) continue;
-
-			double trend = (row.avgRecent() - row.avgPrev()) / row.avgPrev();
+			if (row.regionTrend() == null)
+				continue;
 
 			oltpJdbc.update(
 				"""
-				update region
-				   set trend_30d = :trend
-				 where id = :regionId
-				""",
+					update region
+					   set trend_30d = :trend
+					 where id = :regionId
+					""",
 				Map.of(
 					"regionId", row.regionId(),
-					"trend", trend
+					"trend", row.regionTrend()
 				)
 			);
 			updated++;
@@ -112,9 +144,6 @@ public class TradeTrendTasklet implements Tasklet {
 		return RepeatStatus.FINISHED;
 	}
 
-	private record TrendRow(
-		long regionId,
-		double avgRecent,
-		double avgPrev
-	) {}
+	private record TrendRow(long regionId, Double regionTrend, int complexCnt) {
+	}
 }
