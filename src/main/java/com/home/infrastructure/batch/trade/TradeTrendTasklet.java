@@ -21,11 +21,14 @@ import lombok.extern.slf4j.Slf4j;
 public class TradeTrendTasklet implements Tasklet {
 
 	private final NamedParameterJdbcTemplate olapJdbc;
+	private final NamedParameterJdbcTemplate oltpJdbc;
 
 	public TradeTrendTasklet(
-		@Qualifier("olapJdbc") NamedParameterJdbcTemplate olapJdbc
+		@Qualifier("olapJdbc") NamedParameterJdbcTemplate olapJdbc,
+		@Qualifier("oltpJdbc") NamedParameterJdbcTemplate oltpJdbc
 	) {
 		this.olapJdbc = olapJdbc;
+		this.oltpJdbc = oltpJdbc;
 	}
 
 	@Override
@@ -91,7 +94,7 @@ public class TradeTrendTasklet implements Tasklet {
 
 			double trend = (row.avgRecent() - row.avgPrev()) / row.avgPrev();
 
-			olapJdbc.update(
+			oltpJdbc.update(
 				"""
 				update region
 				   set trend_30d = :trend

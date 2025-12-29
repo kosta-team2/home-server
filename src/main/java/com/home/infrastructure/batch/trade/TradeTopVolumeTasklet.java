@@ -1,6 +1,7 @@
 package com.home.infrastructure.batch.trade;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.batch.core.StepContribution;
@@ -20,11 +21,14 @@ import lombok.extern.slf4j.Slf4j;
 public class TradeTopVolumeTasklet implements Tasklet {
 
 	private final NamedParameterJdbcTemplate olapJdbc;
+	private final NamedParameterJdbcTemplate oltpJdbc;
 
 	public TradeTopVolumeTasklet(
-		@Qualifier("olapJdbc") NamedParameterJdbcTemplate olapJdbc
+		@Qualifier("olapJdbc") NamedParameterJdbcTemplate olapJdbc,
+		@Qualifier("oltpJdbc") NamedParameterJdbcTemplate oltpJdbc
 	) {
 		this.olapJdbc = olapJdbc;
+		this.oltpJdbc = oltpJdbc;
 	}
 
 	@Override
@@ -32,14 +36,10 @@ public class TradeTopVolumeTasklet implements Tasklet {
 		StepContribution contribution,
 		ChunkContext chunkContext
 	) {
-
 		LocalDate today = LocalDate.now();
 
-		olapJdbc.getJdbcTemplate().execute("truncate table trade_top_volume_30d");
-
-		int inserted = olapJdbc.update(
+		List<TopVolumeRow> rows = olapJdbc.query(
 			"""
-			insert into trade_top_volume_30d (region_id, rank, complex_id, deal_count)
 			select
 			    region_id,
 			    rank,
@@ -62,13 +62,45 @@ public class TradeTopVolumeTasklet implements Tasklet {
 			    group by r.id, c.id
 			) ranked
 			where rank <= 10
+			order by region_id, rank
 			""",
-			Map.of(
-				"fromDate", today.minusDays(30)
+			Map.of("fromDate", today.minusDays(30)),
+			(rs, i) -> new TopVolumeRow(
+				rs.getLong("region_id"),
+				rs.getInt("rank"),
+				rs.getLong("complex_id"),
+				rs.getLong("deal_count")
 			)
 		);
 
-		log.info("[BATCH][TOP_VOLUME_30D] inserted rows={}", inserted);
+		oltpJdbc.getJdbcTemplate()
+			.execute("truncate table trade_top_volume_30d");
+
+		for (TopVolumeRow row : rows) {
+			oltpJdbc.update(
+				"""
+				insert into trade_top_volume_30d
+				    (region_id, rank, complex_id, deal_count)
+				values
+				    (:regionId, :rank, :complexId, :dealCount)
+				""",
+				Map.of(
+					"regionId", row.regionId(),
+					"rank", row.rank(),
+					"complexId", row.complexId(),
+					"dealCount", row.dealCount()
+				)
+			);
+		}
+
+		log.info("[BATCH][TOP_VOLUME_30D] inserted rows={}", rows.size());
 		return RepeatStatus.FINISHED;
 	}
+
+	private record TopVolumeRow(
+		long regionId,
+		int rank,
+		long complexId,
+		long dealCount
+	) {}
 }

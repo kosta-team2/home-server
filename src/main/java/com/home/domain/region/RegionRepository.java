@@ -37,7 +37,8 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
         r.id            AS id,
         r.name   AS regionName,
         r.latitude      AS latitude,
-        r.longitude     AS longitude
+        r.longitude     AS longitude,
+        r.trend30D      AS trend
     FROM region r
     WHERE r.level = :level
       AND r.geom IS NOT NULL
