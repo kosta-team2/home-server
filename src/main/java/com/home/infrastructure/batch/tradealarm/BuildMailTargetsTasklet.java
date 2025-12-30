@@ -48,7 +48,7 @@ public class BuildMailTargetsTasklet implements Tasklet {
 			    and c.parcel_id is not null
 			) p
 			join favorite_parcel fp
-			  on fp.parcel_id = p.parcel_id
+			  on fp.parcel_id::bigint = p.parcel_id
 			 and fp.alarm_enabled = true
 			 and fp.deleted_at is null
 			join users u
