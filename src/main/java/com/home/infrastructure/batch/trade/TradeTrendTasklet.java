@@ -36,6 +36,9 @@ public class TradeTrendTasklet implements Tasklet {
 
 		LocalDate today = LocalDate.now();
 
+		LocalDate recentFrom = today.minusMonths(3);
+		LocalDate prevFrom = today.minusMonths(6);
+
 		List<TrendRow> rows = olapJdbc.query(
 			"""
 				with base_trade as (
@@ -108,9 +111,9 @@ public class TradeTrendTasklet implements Tasklet {
 				""",
 			Map.of(
 				"today", today,
-				"fromDate", today.minusMonths(6),
-				"recentFrom", today.minusMonths(1),
-				"prevFrom", today.minusMonths(2),
+				"fromDate", prevFrom,
+				"recentFrom", recentFrom,
+				"prevFrom", prevFrom,
 				"minTrades", 2
 			),
 			(rs, i) -> new TrendRow(
