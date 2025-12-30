@@ -31,11 +31,16 @@ public class TradeDailyCollectTasklet implements Tasklet {
 		StepContribution contribution,
 		ChunkContext chunkContext
 	) {
-		String runDateParam = (String)chunkContext.getStepContext()
+		String runDateParam = (String) chunkContext.getStepContext()
 			.getJobParameters()
 			.get("runDate");
 
-		LocalDate targetDate = LocalDate.parse(runDateParam);
+		YearMonth ym = YearMonth.parse(
+			runDateParam,
+			DateTimeFormatter.ofPattern("yyyyMM")
+		);
+
+		LocalDate targetDate = ym.atDay(1);
 
 		long insertedCount = service.collect(targetDate);
 
@@ -46,8 +51,8 @@ public class TradeDailyCollectTasklet implements Tasklet {
 			.putLong("dailyInsertedCount", insertedCount);
 
 		log.info(
-			"[BATCH][TRADE_COLLECT] targetDate={}, inserted={}",
-			targetDate, insertedCount
+			"[BATCH][TRADE_COLLECT] targetYm={}, inserted={}",
+			ym, insertedCount
 		);
 
 		return RepeatStatus.FINISHED;
