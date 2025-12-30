@@ -12,7 +12,7 @@ import com.home.infrastructure.web.rankings.dto.RegionTopVolumeRankResponse;
 import com.home.infrastructure.web.rankings.dto.TopPriceRankResponse;
 
 @RestController
-@RequestMapping("/api/v1/rankings")
+@RequestMapping("api/v1/rankings")
 public class RankingsController {
 	private final RankingUseCase useCase;
 
