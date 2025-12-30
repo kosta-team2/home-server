@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.home.infrastructure.batch.common.BatchSummaryListener;
 import com.home.infrastructure.batch.trade.TradeDailyCollectTasklet;
 import com.home.infrastructure.batch.trade.TradeTopPriceTasklet;
 import com.home.infrastructure.batch.trade.TradeTopVolumeTasklet;
@@ -39,9 +40,11 @@ public class TradeDailyJobConfig {
 		Step tradeTrendStep,
 		Step tradeTopVolumeStep,
 		Step tradeTopPriceStep,
-		Step sendTradeAlarmMailsStep
+		Step sendTradeAlarmMailsStep,
+		BatchSummaryListener batchSummaryListener
 	) {
 		return new JobBuilder("tradeDailyJob", jobRepository)
+			.listener(batchSummaryListener)
 			.start(tradeCollectStep)
 			.next(tradeTrendStep)
 			.next(tradeTopVolumeStep)
