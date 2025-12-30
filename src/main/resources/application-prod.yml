@@ -30,3 +30,18 @@ server:
 logging:
   level:
     root: warn
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics,info,prometheus"
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: home-app
+
+slack:
+  webhook-url: ${SLACK_WEBHOOK_URL:}
