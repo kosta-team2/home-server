@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -14,10 +15,13 @@ import com.home.infrastructure.batch.trade.dto.TradeRow;
 import lombok.RequiredArgsConstructor;
 
 @Component
-@RequiredArgsConstructor
 public class TradeBulkWriter {
 
 	private final JdbcTemplate jdbcTemplate;
+
+	public TradeBulkWriter(@Qualifier("olapJdbcTemplate") JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
 
 	private static final String SQL = """
 		INSERT INTO trade

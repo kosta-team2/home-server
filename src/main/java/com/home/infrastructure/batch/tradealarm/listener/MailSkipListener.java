@@ -1,6 +1,7 @@
 package com.home.infrastructure.batch.tradealarm.listener;
 
 import org.springframework.batch.core.SkipListener;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.home.infrastructure.batch.tradealarm.dto.MailTargetRow;
@@ -9,7 +10,7 @@ public class MailSkipListener implements SkipListener<MailTargetRow, MailTargetR
 
 	private final JdbcTemplate jdbc;
 
-	public MailSkipListener(JdbcTemplate jdbc) {
+	public MailSkipListener(@Qualifier("olapJdbcTemplate") JdbcTemplate jdbc) {
 		this.jdbc = jdbc;
 	}
 

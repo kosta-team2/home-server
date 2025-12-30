@@ -54,6 +54,7 @@ public class BatchDataSourceConfig {
 	}
 
 	@Bean(name = "olapJdbcTemplate")
+	@Primary
 	public JdbcTemplate olapJdbcTemplate(@Qualifier("olapDataSource") DataSource ds) {
 		return new JdbcTemplate(ds);
 	}
