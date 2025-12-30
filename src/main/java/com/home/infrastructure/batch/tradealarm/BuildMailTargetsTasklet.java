@@ -52,7 +52,7 @@ public class BuildMailTargetsTasklet implements Tasklet {
 			 and fp.alarm_enabled = true
 			 and fp.deleted_at is null
 			join users u
-			  on u.id = fp.user_id
+			  on u.id = fp.user_id::bigint
 			 and u.deleted_at is null
 			on conflict (batch_date, mail_type, user_id, parcel_id) do nothing
 			""";
