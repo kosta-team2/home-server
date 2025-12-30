@@ -46,7 +46,7 @@ public class TradeAlarmBatchConfig {
 	@Bean
 	public Step buildMailTargetsStep(JobRepository jobRepository,
 		PlatformTransactionManager tx,
-		@Qualifier("oltpJdbc") NamedParameterJdbcTemplate namedJdbc) {
+		@Qualifier("olapJdbc") NamedParameterJdbcTemplate namedJdbc) {
 		return new StepBuilder("buildMailTargetsStep", jobRepository)
 			.tasklet(new BuildMailTargetsTasklet(namedJdbc), tx)
 			.build();
