@@ -40,7 +40,7 @@ public class BuildMailTargetsTasklet implements Tasklet {
 			from (
 			  select distinct c.parcel_id
 			  from trade t
-			  join complex c on c.id = t.complex_id
+			  join complex c on c.id = t.complex_pk
 			  where t.created_at >= :fromTs
 			    and t.created_at <  :toTs
 			    and t.deleted_at is null
