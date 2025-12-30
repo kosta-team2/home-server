@@ -19,42 +19,39 @@ public class BatchSummaryListener extends JobExecutionListenerSupport {
 
 	@Override
 	public void afterJob(JobExecution jobExecution) {
-		String jobName = jobExecution.getJobInstance().getJobName();
 
+		var jobCtx = jobExecution.getExecutionContext();
+
+		String jobName = jobExecution.getJobInstance().getJobName();
 		String runDate = jobExecution.getJobParameters().getString("runDate", "-");
 
-		Duration duration = Duration.between(jobExecution.getStartTime(), jobExecution.getEndTime());
-		String durationStr = format(duration);
+		Duration duration = Duration.between(
+			jobExecution.getStartTime(),
+			jobExecution.getEndTime()
+		);
 
-		Counters trade = sumStep(jobExecution.getStepExecutions(), "trade");
+		long tradeRead = jobCtx.getLong("trade.read", 0L);
+		long tradeWrite = jobCtx.getLong("trade.write", 0L);
+		long tradeSkip = jobCtx.getLong("trade.skip", 0L);
 
-		int trendUpdated = sumCtxInt(jobExecution.getStepExecutions(), "trend.updated");
-		int mailTarget = sumCtxInt(jobExecution.getStepExecutions(), "mail.target");
-		int mailSent = sumCtxInt(jobExecution.getStepExecutions(), "mail.sent");
-		int mailFailed = sumCtxInt(jobExecution.getStepExecutions(), "mail.failed");
+		long trendUpdated = jobCtx.getLong("trend.updated", 0L);
 
-		long partitions = jobExecution.getStepExecutions().stream()
-			.filter(se -> se.getStepName().startsWith("tradeWorkerStep"))
-			.count();
-
-		int threads = 8;
+		long mailTarget = jobCtx.getLong("mail.target", 0L);
+		long mailSent = jobCtx.getLong("mail.sent", 0L);
+		long mailFailed = jobCtx.getLong("mail.failed", 0L);
 
 		boolean success = jobExecution.getStatus() == BatchStatus.COMPLETED;
 
 		String message = buildMessage(
 			success, jobName, runDate,
-			trade.read, trade.write, trade.filterOrSkip,
-			trendUpdated,
-			mailTarget, mailSent, mailFailed,
-			threads, partitions,
-			durationStr,
+			tradeRead, tradeWrite, tradeSkip,
+			(int)trendUpdated,
+			(int)mailTarget, (int)mailSent, (int)mailFailed,
+			8,
+			jobExecution.getStepExecutions().size(),
+			format(duration),
 			jobExecution
 		);
-
-		if (success)
-			log.info(message);
-		else
-			log.error(message);
 
 		slackNotifier.send(message);
 	}

@@ -40,6 +40,7 @@ public class TradeDailyJobConfig {
 		Step tradeTrendStep,
 		Step tradeTopVolumeStep,
 		Step tradeTopPriceStep,
+		Step buildMailTargetsStep,
 		Step sendTradeAlarmMailsStep,
 		BatchSummaryListener batchSummaryListener
 	) {
@@ -49,6 +50,7 @@ public class TradeDailyJobConfig {
 			.next(tradeTrendStep)
 			.next(tradeTopVolumeStep)
 			.next(tradeTopPriceStep)
+			.next(buildMailTargetsStep)
 			.next(sendTradeAlarmMailsStep)
 			.build();
 	}

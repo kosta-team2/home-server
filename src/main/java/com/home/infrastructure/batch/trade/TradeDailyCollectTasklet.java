@@ -20,9 +20,7 @@ public class TradeDailyCollectTasklet implements Tasklet {
 
 	private final TradeDailyCollectService service;
 
-	public TradeDailyCollectTasklet(
-		TradeDailyCollectService service
-	) {
+	public TradeDailyCollectTasklet(TradeDailyCollectService service) {
 		this.service = service;
 	}
 
@@ -31,7 +29,7 @@ public class TradeDailyCollectTasklet implements Tasklet {
 		StepContribution contribution,
 		ChunkContext chunkContext
 	) {
-		String runDateParam = (String) chunkContext.getStepContext()
+		String runDateParam = (String)chunkContext.getStepContext()
 			.getJobParameters()
 			.get("runDate");
 
@@ -46,11 +44,16 @@ public class TradeDailyCollectTasklet implements Tasklet {
 
 		long insertedCount = service.collect(targetDate);
 
-		chunkContext.getStepContext()
+		var jobExecution = chunkContext.getStepContext()
 			.getStepExecution()
-			.getJobExecution()
-			.getExecutionContext()
-			.putLong("dailyInsertedCount", insertedCount);
+			.getJobExecution();
+
+		var jobCtx = jobExecution.getExecutionContext();
+
+		jobCtx.putLong(
+			"trade.write",
+			jobCtx.getLong("trade.write", 0L) + insertedCount
+		);
 
 		log.info(
 			"[BATCH][TRADE_COLLECT] runDate={} → targetYm={}, inserted={}",

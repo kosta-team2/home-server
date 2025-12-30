@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
+import org.springframework.batch.core.scope.context.StepSynchronizationManager;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailAuthenticationException;
@@ -47,6 +48,20 @@ public class MailSendProcessor implements ItemProcessor<MailTargetRow, MailTarge
 
 		try {
 			sendMail(item);
+
+			var stepContext = StepSynchronizationManager.getContext();
+			if (stepContext != null) {
+				var jobCtx = stepContext
+					.getStepExecution()
+					.getJobExecution()
+					.getExecutionContext();
+
+				jobCtx.putLong(
+					"mail.sent",
+					jobCtx.getLong("mail.sent", 0L) + 1
+				);
+			}
+
 			return item;
 
 		} catch (MailAuthenticationException e) {

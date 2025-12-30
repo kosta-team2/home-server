@@ -22,6 +22,19 @@ public class MailSkipListener implements SkipListener<MailTargetRow, MailTargetR
 			       last_error = ?
 			 where id = ?
 			""", truncate(t.getMessage(), 2000), item.id());
+
+		var stepContext = org.springframework.batch.core.scope.context.StepSynchronizationManager.getContext();
+		if (stepContext != null) {
+			var jobCtx = stepContext
+				.getStepExecution()
+				.getJobExecution()
+				.getExecutionContext();
+
+			jobCtx.putLong(
+				"mail.failed",
+				jobCtx.getLong("mail.failed", 0L) + 1
+			);
+		}
 	}
 
 	private String truncate(String s, int max) {
