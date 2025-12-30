@@ -35,8 +35,10 @@ public class TradeDailyCollectTasklet implements Tasklet {
 			.getJobParameters()
 			.get("runDate");
 
+		String ymParam = runDateParam.replace("-", "").substring(0, 6);
+
 		YearMonth ym = YearMonth.parse(
-			runDateParam,
+			ymParam,
 			DateTimeFormatter.ofPattern("yyyyMM")
 		);
 
@@ -51,8 +53,8 @@ public class TradeDailyCollectTasklet implements Tasklet {
 			.putLong("dailyInsertedCount", insertedCount);
 
 		log.info(
-			"[BATCH][TRADE_COLLECT] targetYm={}, inserted={}",
-			ym, insertedCount
+			"[BATCH][TRADE_COLLECT] runDate={} → targetYm={}, inserted={}",
+			runDateParam, ym, insertedCount
 		);
 
 		return RepeatStatus.FINISHED;

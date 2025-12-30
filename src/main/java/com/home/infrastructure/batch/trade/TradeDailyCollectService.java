@@ -68,8 +68,6 @@ public class TradeDailyCollectService {
 						dto.dealDay()
 					);
 
-					if (!dealDate.equals(targetDate)) continue;
-
 					ComplexResolveService.ResolvedComplex resolved =
 						complexResolveService.resolve(dto, dealYmd);
 
