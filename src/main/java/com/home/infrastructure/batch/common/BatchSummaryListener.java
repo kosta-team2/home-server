@@ -21,6 +21,7 @@ public class BatchSummaryListener extends JobExecutionListenerSupport {
 	public void afterJob(JobExecution jobExecution) {
 
 		var jobCtx = jobExecution.getExecutionContext();
+		var steps = jobExecution.getStepExecutions();
 
 		String jobName = jobExecution.getJobInstance().getJobName();
 		String runDate = jobExecution.getJobParameters().getString("runDate", "-");
@@ -30,14 +31,18 @@ public class BatchSummaryListener extends JobExecutionListenerSupport {
 			jobExecution.getEndTime()
 		);
 
-		long tradeRead = jobCtx.getLong("trade.read", 0L);
-		long tradeWrite = jobCtx.getLong("trade.write", 0L);
-		long tradeSkip = jobCtx.getLong("trade.skip", 0L);
+		Counters trade = sumStep(steps, "tradeCollect");
+		long tradeRead  = Math.max(trade.read(), jobCtx.getLong("trade.read", 0L));
+		long tradeWrite = Math.max(trade.write(), jobCtx.getLong("trade.write", 0L));
+		long tradeSkip  = Math.max(trade.filterOrSkip(), jobCtx.getLong("trade.skip", 0L));
 
-		long trendUpdated = jobCtx.getLong("trend.updated", 0L);
+		Counters trend = sumStep(steps, "tradeTrend");
+		long trendUpdated = Math.max(trend.write(), jobCtx.getLong("trend.updated", 0L));
 
-		long mailTarget = jobCtx.getLong("mail.target", 0L);
-		long mailSent = jobCtx.getLong("mail.sent", 0L);
+		Counters mailTargets = sumStep(steps, "buildMailTargets");
+		long mailTarget = Math.max(mailTargets.write(), jobCtx.getLong("mail.target", 0L));
+
+		long mailSent   = jobCtx.getLong("mail.sent", 0L);
 		long mailFailed = jobCtx.getLong("mail.failed", 0L);
 
 		boolean success = jobExecution.getStatus() == BatchStatus.COMPLETED;

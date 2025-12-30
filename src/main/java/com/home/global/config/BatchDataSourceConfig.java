@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @Configuration
@@ -50,5 +51,15 @@ public class BatchDataSourceConfig {
 	@Bean(name = "oltpJdbc")
 	public NamedParameterJdbcTemplate oltpJdbc(@Qualifier("oltpDataSource") DataSource ds) {
 		return new NamedParameterJdbcTemplate(ds);
+	}
+
+	@Bean(name = "olapJdbcTemplate")
+	public JdbcTemplate olapJdbcTemplate(@Qualifier("olapDataSource") DataSource ds) {
+		return new JdbcTemplate(ds);
+	}
+
+	@Bean(name = "oltpJdbcTemplate")
+	public JdbcTemplate oltpJdbcTemplate(@Qualifier("oltpDataSource") DataSource ds) {
+		return new JdbcTemplate(ds);
 	}
 }

@@ -46,9 +46,11 @@ public class TradeAlarmBatchConfig {
 	@Bean
 	public Step buildMailTargetsStep(JobRepository jobRepository,
 		PlatformTransactionManager tx,
-		@Qualifier("olapJdbc") NamedParameterJdbcTemplate namedJdbc) {
+		@Qualifier("olapJdbc") NamedParameterJdbcTemplate olapJdbc,
+		@Qualifier("oltpJdbc") NamedParameterJdbcTemplate oltpJdbc
+	) {
 		return new StepBuilder("buildMailTargetsStep", jobRepository)
-			.tasklet(new BuildMailTargetsTasklet(namedJdbc), tx)
+			.tasklet(new BuildMailTargetsTasklet(olapJdbc, oltpJdbc), tx)
 			.build();
 	}
 
@@ -78,7 +80,7 @@ public class TradeAlarmBatchConfig {
 	@Bean
 	@StepScope
 	public JdbcPagingItemReader<MailTargetRow> mailTargetReader(
-		DataSource dataSource,
+		@Qualifier("olapDataSource") DataSource dataSource,
 		@Value("#{jobParameters['runDate']}") String runDateStr
 	) {
 		LocalDate runDate = (runDateStr == null) ? LocalDate.now() : LocalDate.parse(runDateStr);
@@ -88,7 +90,7 @@ public class TradeAlarmBatchConfig {
 	@Bean
 	@StepScope
 	public MailSendProcessor mailSendProcessor(
-		JdbcTemplate jdbcTemplate,
+		@Qualifier("olapJdbcTemplate") JdbcTemplate jdbcTemplate,
 		JavaMailSender mailSender,
 		@Value("${spring.mail.username}") String fromAddress,
 		@Value("${app.mail.from-name:우리서비스}") String fromName
@@ -97,12 +99,16 @@ public class TradeAlarmBatchConfig {
 	}
 
 	@Bean
-	public MailStatusSuccessWriter mailStatusSuccessWriter(JdbcTemplate jdbcTemplate) {
+	public MailStatusSuccessWriter mailStatusSuccessWriter(
+		@Qualifier("olapJdbcTemplate") JdbcTemplate jdbcTemplate
+	) {
 		return new MailStatusSuccessWriter(jdbcTemplate);
 	}
 
 	@Bean
-	public MailSkipListener mailSkipListener(JdbcTemplate jdbcTemplate) {
+	public MailSkipListener mailSkipListener(
+		@Qualifier("olapJdbcTemplate") JdbcTemplate jdbcTemplate
+	) {
 		return new MailSkipListener(jdbcTemplate);
 	}
 }
