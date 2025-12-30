@@ -16,12 +16,11 @@ import com.home.infrastructure.batch.trade.dto.TradeRow;
 import lombok.RequiredArgsConstructor;
 
 @Component
-@Profile("batch")
 public class TradeBulkWriter {
 
 	private final JdbcTemplate jdbcTemplate;
 
-	public TradeBulkWriter(@Qualifier("olapJdbcTemplate") JdbcTemplate jdbcTemplate) {
+	public TradeBulkWriter(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
