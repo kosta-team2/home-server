@@ -17,9 +17,11 @@ import com.home.domain.user.User;
 import com.home.domain.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RefreshTokenService {
 
 	private final RefreshTokenRepository refreshTokenRepository;
@@ -34,17 +36,14 @@ public class RefreshTokenService {
 
 		Instant now = Instant.now();
 
-		refreshTokenRepository
-			.findByUserIdAndRevokedAtIsNull(userId)
-			.ifPresent(token -> token.revoke(now));
+		int revoked = refreshTokenRepository.revokeActiveByUserId(userId, now);
+		log.info("revoked active refresh tokens: {}", revoked);
 
 		String raw = generateRawToken();
 		String hash = sha256Hex(raw);
 
-		Instant expiresAt = now.plus(ttl);
-
 		refreshTokenRepository.save(
-			RefreshToken.issue(user, hash, expiresAt)
+			RefreshToken.issue(user, hash, now.plus(ttl))
 		);
 
 		return raw;
