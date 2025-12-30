@@ -23,6 +23,9 @@ public class TradeDailyCollectService {
 	private static final int PAGE_SIZE = 1000;
 	private static final int BATCH_SIZE = 2000;
 
+	public record CollectResult(long read, long inserted, long skipped) {
+	}
+
 	private final ApisClient apisClient;
 	private final TradeBulkWriter tradeBulkWriter;
 	private final NamedParameterJdbcTemplate olapJdbc;
@@ -40,7 +43,7 @@ public class TradeDailyCollectService {
 		this.complexResolveService = complexResolveService;
 	}
 
-	public long collect(LocalDate targetDate) {
+	public CollectResult collect(LocalDate targetDate) {
 
 		YearMonth ym = YearMonth.from(targetDate);
 		String dealYmd = ym.format(DateTimeFormatter.ofPattern("yyyyMM"));
@@ -48,7 +51,10 @@ public class TradeDailyCollectService {
 		List<String> sggCodes = loadSggCodes();
 
 		List<TradeRow> buffer = new ArrayList<>(BATCH_SIZE);
+
+		long readTotal = 0;
 		long insertedTotal = 0;
+		long skippedTotal = 0;
 
 		for (String sggCode : sggCodes) {
 			int page = 1;
@@ -58,7 +64,10 @@ public class TradeDailyCollectService {
 					apisClient.getAptTrade(page, PAGE_SIZE, sggCode, dealYmd)
 						.toApisDto();
 
-				if (list == null || list.isEmpty()) break;
+				if (list == null || list.isEmpty())
+					break;
+
+				readTotal += list.size();
 
 				for (ApisAptTradeDto dto : list) {
 
@@ -68,13 +77,17 @@ public class TradeDailyCollectService {
 						dto.dealDay()
 					);
 
-					ComplexResolveService.ResolvedComplex resolved =
-						complexResolveService.resolve(dto, dealYmd);
-
-					if (resolved == null) continue;
+					var resolved = complexResolveService.resolve(dto, dealYmd);
+					if (resolved == null) {
+						skippedTotal++;
+						continue;
+					}
 
 					long amount = parseAmount(dto.dealAmount());
-					if (amount <= 0) continue;
+					if (amount <= 0) {
+						skippedTotal++;
+						continue;
+					}
 
 					buffer.add(new TradeRow(
 						dealDate,
@@ -91,11 +104,13 @@ public class TradeDailyCollectService {
 					if (buffer.size() >= BATCH_SIZE) {
 						var r = tradeBulkWriter.insertIgnore(buffer);
 						insertedTotal += r.inserted();
+						skippedTotal += r.skipped();
 						buffer.clear();
 					}
 				}
 
-				if (list.size() < PAGE_SIZE) break;
+				if (list.size() < PAGE_SIZE)
+					break;
 				page++;
 			}
 		}
@@ -103,14 +118,14 @@ public class TradeDailyCollectService {
 		if (!buffer.isEmpty()) {
 			var r = tradeBulkWriter.insertIgnore(buffer);
 			insertedTotal += r.inserted();
+			skippedTotal += r.skipped();
 		}
 
-		log.info(
-			"[DAILY][COLLECT] date={}, inserted={}",
-			targetDate, insertedTotal
+		log.info("[DAILY][COLLECT] date={}, read={}, inserted={}, skipped={}",
+			targetDate, readTotal, insertedTotal, skippedTotal
 		);
 
-		return insertedTotal;
+		return new CollectResult(readTotal, insertedTotal, skippedTotal);
 	}
 
 	private List<String> loadSggCodes() {
@@ -122,7 +137,8 @@ public class TradeDailyCollectService {
 	}
 
 	private long parseAmount(String s) {
-		if (s == null || s.isBlank()) return 0L;
+		if (s == null || s.isBlank())
+			return 0L;
 		return Long.parseLong(s.replace(",", "").trim());
 	}
 }

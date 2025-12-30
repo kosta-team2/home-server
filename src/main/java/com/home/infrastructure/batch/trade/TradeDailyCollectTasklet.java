@@ -25,10 +25,8 @@ public class TradeDailyCollectTasklet implements Tasklet {
 	}
 
 	@Override
-	public RepeatStatus execute(
-		StepContribution contribution,
-		ChunkContext chunkContext
-	) {
+	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
+
 		String runDateParam = (String)chunkContext.getStepContext()
 			.getJobParameters()
 			.get("runDate");
@@ -42,7 +40,7 @@ public class TradeDailyCollectTasklet implements Tasklet {
 
 		LocalDate targetDate = ym.atDay(1);
 
-		long insertedCount = service.collect(targetDate);
+		TradeDailyCollectService.CollectResult r = service.collect(targetDate);
 
 		var jobExecution = chunkContext.getStepContext()
 			.getStepExecution()
@@ -50,14 +48,21 @@ public class TradeDailyCollectTasklet implements Tasklet {
 
 		var jobCtx = jobExecution.getExecutionContext();
 
-		jobCtx.putLong(
-			"trade.write",
-			jobCtx.getLong("trade.write", 0L) + insertedCount
+		jobCtx.putLong("trade.read",
+			jobCtx.getLong("trade.read", 0L) + r.read()
+		);
+
+		jobCtx.putLong("trade.write",
+			jobCtx.getLong("trade.write", 0L) + r.inserted()
+		);
+
+		jobCtx.putLong("trade.skip",
+			jobCtx.getLong("trade.skip", 0L) + r.skipped()
 		);
 
 		log.info(
-			"[BATCH][TRADE_COLLECT] runDate={} → targetYm={}, inserted={}",
-			runDateParam, ym, insertedCount
+			"[BATCH][TRADE_COLLECT] runDate={} → targetYm={}, read={}, inserted={}, skipped={}",
+			runDateParam, ym, r.read(), r.inserted(), r.skipped()
 		);
 
 		return RepeatStatus.FINISHED;

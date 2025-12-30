@@ -32,17 +32,29 @@ public class BatchSummaryListener extends JobExecutionListenerSupport {
 		);
 
 		Counters trade = sumStep(steps, "tradeCollect");
-		long tradeRead  = Math.max(trade.read(), jobCtx.getLong("trade.read", 0L));
-		long tradeWrite = Math.max(trade.write(), jobCtx.getLong("trade.write", 0L));
-		long tradeSkip  = Math.max(trade.filterOrSkip(), jobCtx.getLong("trade.skip", 0L));
 
-		Counters trend = sumStep(steps, "tradeTrend");
-		long trendUpdated = Math.max(trend.write(), jobCtx.getLong("trend.updated", 0L));
+		long tradeRead = Math.max(
+			trade.read(),
+			Math.max(sumCtxLong(steps, "tradeCollect", "trade.read"),
+				jobCtx.getLong("trade.read", 0L))
+		);
+
+		long tradeWrite = Math.max(
+			trade.write(),
+			Math.max(sumCtxLong(steps, "tradeCollect", "trade.write"),
+				jobCtx.getLong("trade.write", 0L))
+		);
+
+		long tradeSkip = Math.max(
+			trade.filterOrSkip(),
+			Math.max(sumCtxLong(steps, "tradeCollect", "trade.skip"),
+				jobCtx.getLong("trade.skip", 0L))
+		);
 
 		Counters mailTargets = sumStep(steps, "buildMailTargets");
 		long mailTarget = Math.max(mailTargets.write(), jobCtx.getLong("mail.target", 0L));
 
-		long mailSent   = jobCtx.getLong("mail.sent", 0L);
+		long mailSent = jobCtx.getLong("mail.sent", 0L);
 		long mailFailed = jobCtx.getLong("mail.failed", 0L);
 
 		boolean success = jobExecution.getStatus() == BatchStatus.COMPLETED;
@@ -50,7 +62,6 @@ public class BatchSummaryListener extends JobExecutionListenerSupport {
 		String message = buildMessage(
 			success, jobName, runDate,
 			tradeRead, tradeWrite, tradeSkip,
-			(int)trendUpdated,
 			(int)mailTarget, (int)mailSent, (int)mailFailed,
 			8,
 			jobExecution.getStepExecutions().size(),
@@ -68,7 +79,6 @@ public class BatchSummaryListener extends JobExecutionListenerSupport {
 		long tradeRead,
 		long tradeWrite,
 		long tradeSkip,
-		int trendUpdated,
 		int mailTarget,
 		int mailSent,
 		int mailFailed,
@@ -87,7 +97,6 @@ public class BatchSummaryListener extends JobExecutionListenerSupport {
 			.append("- 실거래가: 조회 ").append(formatNum(tradeRead))
 			.append(" / 저장 ").append(formatNum(tradeWrite))
 			.append(" / 스킵 ").append(formatNum(tradeSkip)).append("\n")
-			.append("- 계산: trend 업데이트 ").append(formatNum(trendUpdated)).append("건\n")
 			.append("- 메일: 대상 ").append(formatNum(mailTarget))
 			.append(" / 성공 ").append(formatNum(mailSent))
 			.append(" / 실패 ").append(formatNum(mailFailed)).append("\n")
@@ -117,12 +126,14 @@ public class BatchSummaryListener extends JobExecutionListenerSupport {
 		return new Counters(read, write, skip);
 	}
 
-	private static int sumCtxInt(Collection<StepExecution> steps, String key) {
-		int sum = 0;
+	private static long sumCtxLong(Collection<StepExecution> steps, String stepNameContains, String key) {
+		long sum = 0;
 		for (StepExecution se : steps) {
-			if (se.getExecutionContext().containsKey(key)) {
-				sum += se.getExecutionContext().getInt(key);
-			}
+			if (!se.getStepName().contains(stepNameContains))
+				continue;
+			var ec = se.getExecutionContext();
+			if (ec.containsKey(key))
+				sum += ec.getLong(key);
 		}
 		return sum;
 	}
