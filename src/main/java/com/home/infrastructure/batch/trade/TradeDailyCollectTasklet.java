@@ -1,6 +1,8 @@
 package com.home.infrastructure.batch.trade;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -29,15 +31,24 @@ public class TradeDailyCollectTasklet implements Tasklet {
 		StepContribution contribution,
 		ChunkContext chunkContext
 	) {
-		LocalDate targetDate = LocalDate.now();
+		String runDateParam = (String)chunkContext.getStepContext()
+			.getJobParameters()
+			.get("runDate");
 
-		long inserted = service.collect(targetDate);
+		LocalDate targetDate = LocalDate.parse(runDateParam);
+
+		long insertedCount = service.collect(targetDate);
 
 		chunkContext.getStepContext()
 			.getStepExecution()
 			.getJobExecution()
 			.getExecutionContext()
-			.putLong("todayInsertedCount", inserted);
+			.putLong("dailyInsertedCount", insertedCount);
+
+		log.info(
+			"[BATCH][TRADE_COLLECT] targetDate={}, inserted={}",
+			targetDate, insertedCount
+		);
 
 		return RepeatStatus.FINISHED;
 	}
