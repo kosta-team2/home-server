@@ -33,7 +33,7 @@ public class BuildMailTargetsTasklet implements Tasklet {
 			  :batchDate as batch_date,
 			  'TRADE_UPDATE' as mail_type,
 			  u.id as user_id,
-			  fp.parcel_id as parcel_id,
+			  fp.parcel_id::bigint as parcel_id,
 			  u.user_email as email,
 			  fp.complex_name as complex_name,
 			  'PENDING' as status
