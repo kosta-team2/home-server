@@ -1,6 +1,6 @@
 # home-server
 
-## 서비스 사진
+## 서비스 화면
 ### 메인
 <img width="1422" height="741" alt="image" src="https://github.com/user-attachments/assets/f5a8f367-554e-45d9-91c2-5c8b95ec0963" />
 
