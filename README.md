@@ -11,3 +11,6 @@
 
 ### 통계 자료 
 <img width="1424" height="748" alt="image" src="https://github.com/user-attachments/assets/ddea06ff-eef4-4717-93e3-5dbc90ef7c5e" />
+
+### 전체 영상
+▶️ [YouTube 전체 영상](https://www.youtube.com/watch?v=bzrp5-VS8uQ)
